@@ -36,6 +36,8 @@ SDL_Surface* swith_on= nullptr;
 SDL_Surface* victim_civilian= nullptr;
 
 SDL_Surface* tram= nullptr;
+SDL_Surface* tram_up= nullptr;
+SDL_Surface* tram_down= nullptr;
 
 SDL_Surface* blood[4]= { nullptr, nullptr, nullptr, nullptr };
 
@@ -85,6 +87,8 @@ void LoadImages()
 	Images::victim_civilian= IMG_Load( "res/victim_civilian.bmp" );
 
 	Images::tram= IMG_Load( "res/tram.bmp" );
+	Images::tram_up= IMG_Load( "res/tram_up.bmp" );
+	Images::tram_down= IMG_Load( "res/tram_down.bmp" );
 
 	auto transparent_color_key= SDL_MapRGB( surface_->format, 0, 0, 0 );
 	SDL_SetColorKey( Images::rails_x, 1, transparent_color_key );
@@ -98,6 +102,8 @@ void LoadImages()
 	SDL_SetColorKey( Images::swith_on, 1, transparent_color_key );
 	SDL_SetColorKey( Images::victim_civilian, 1, transparent_color_key );
 	SDL_SetColorKey( Images::tram, 1, transparent_color_key );
+	SDL_SetColorKey( Images::tram_up, 1, transparent_color_key );
+	SDL_SetColorKey( Images::tram_down, 1, transparent_color_key );
 
 	for( int i= 0; i < 4; ++i )
 	{
@@ -278,35 +284,69 @@ void DrawLevel(const LevelState& level_state )
 		DrawPath( level_state, level_state.level_data->root_path );
 
 		{
-
-			const int sprite_x_offset= ( Images::rails_x->w - Images::tram->w ) / 2;
-			const int sprite_y_offset= ( Images::rails_x->h - Images::tram->h ) / 2;
-
 			const Level::Path& tram_path= *level_state.tram_state.current_path;
 			const size_t rail_segment_index= std::min( size_t(level_state.tram_state.path_progress), tram_path.rails.size() - 1u);
 			const float part= level_state.tram_state.path_progress - float(rail_segment_index);
 			const float part_minus_one= 1.0f - part;
 
 			float x, y;
+			SDL_Surface* s= nullptr;
 			if( rail_segment_index == tram_path.rails.size() - 1u )
 			{
-				x= tram_path.rails[rail_segment_index].x;
-				y= tram_path.rails[rail_segment_index].y;
+				if( tram_path.fork != nullptr )
+				{
+					const auto it= level_state.forks_state.find( tram_path.fork.get() );
+					const Level::Path* next_path= nullptr;
+					if( it != level_state.forks_state.end() && it->second == LevelState::ForkState::Down )
+						next_path= &tram_path.fork->lower_path;
+					else
+						next_path= &tram_path.fork->upper_path;
+
+					x= tram_path.rails[rail_segment_index].x * part_minus_one + part * next_path->rails[0u].x;
+					y= tram_path.rails[rail_segment_index].y * part_minus_one + part * next_path->rails[0u].y;
+
+					if( tram_path.rails[rail_segment_index].x < next_path->rails[0u].x )
+						s= Images::tram;
+					else if( tram_path.rails[rail_segment_index].y > next_path->rails[0u].y )
+						s= Images::tram_up;
+					else if( tram_path.rails[rail_segment_index].y < next_path->rails[0u].y )
+						s= Images::tram_down;
+					else
+						s= Images::tram;
+				}
+				else
+				{
+					x= tram_path.rails[rail_segment_index].x;
+					y= tram_path.rails[rail_segment_index].y;
+					s= Images::tram;
+				}
 			}
 			else
 			{
 				x= tram_path.rails[rail_segment_index].x * part_minus_one + part * tram_path.rails[rail_segment_index+1u].x;
 				y= tram_path.rails[rail_segment_index].y * part_minus_one + part * tram_path.rails[rail_segment_index+1u].y;
+
+				if( tram_path.rails[rail_segment_index].x < tram_path.rails[rail_segment_index+1u].x )
+					s= Images::tram;
+				else if( tram_path.rails[rail_segment_index].y > tram_path.rails[rail_segment_index+1u].y )
+					s= Images::tram_up;
+				else if( tram_path.rails[rail_segment_index].y < tram_path.rails[rail_segment_index+1u].y )
+					s= Images::tram_down;
+				else
+					s= Images::tram;
 			}
 
-			SDL_Rect src_rect{ 0, 0, Images::tram->w, Images::tram->h };
+			const int sprite_x_offset= ( Images::rails_x->w - s->w ) / 2;
+			const int sprite_y_offset= ( Images::rails_x->h - s->h ) / 2;
+
+			SDL_Rect src_rect{ 0, 0, s->w, s->h };
 			SDL_Rect dst_rect{
 				int(x * Images::rails_x->w) * c_graphics_scale + sprite_x_offset * c_graphics_scale,
 				int(y * Images::rails_x->h) * c_graphics_scale + sprite_y_offset * c_graphics_scale,
-				Images::tram->w * c_graphics_scale,
-				Images::tram->h * c_graphics_scale };
+				s->w * c_graphics_scale,
+				s->h * c_graphics_scale };
 
-			SDL_UpperBlitScaled( Images::tram, &src_rect, surface_, &dst_rect );
+			SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
 		}
 	}
 }
