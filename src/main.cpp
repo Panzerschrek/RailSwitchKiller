@@ -119,7 +119,7 @@ void DeInitFont()
 	TTF_Quit();
 }
 
-void DrawPath( const Level::Path& path )
+void DrawPath( const LevelState& level_state, const Level::Path& path )
 {
 	using Direction = Level::RailSegment::Direction;
 
@@ -170,11 +170,15 @@ void DrawPath( const Level::Path& path )
 	if( path.fork != nullptr )
 	{
 		{
-			auto time= SDL_GetTicks();
-
 			Level::RailSegment segment= path.rails.back();
 			++segment.x;
-			SDL_Surface* s= ( (time / 1000)&1) ? Images::swith_off : Images::swith_on;
+
+			SDL_Surface* s= nullptr;
+			const auto it= level_state.forks_state.find( path.fork.get() );
+			if( it != level_state.forks_state.end() && it->second == LevelState::ForkState::Up )
+				s= Images::swith_on;
+			else
+				s= Images::swith_off;
 
 			SDL_Rect src_rect{ 0, 0, s->w, s->h };
 			SDL_Rect dst_rect{
@@ -186,8 +190,8 @@ void DrawPath( const Level::Path& path )
 			SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
 		}
 
-		DrawPath( path.fork->lower_path );
-		DrawPath( path.fork->upper_path );
+		DrawPath( level_state, path.fork->lower_path );
+		DrawPath( level_state, path.fork->upper_path );
 	}
 }
 
@@ -220,8 +224,10 @@ void DrawLevel(const LevelState& level_state )
 			std::string text;
 			if( level_state.level_stage == LevelState::LevelStage::Countdown )
 				text= std::to_string(level_state.countdown_time_left_s) + "...";
-			else
+			else if( level_state.level_stage == LevelState::LevelStage::Action )
 				text= "Action!";
+			else if( level_state.level_stage == LevelState::LevelStage::Finish )
+				text= "Finish!";
 
 			SDL_Surface* const stage_text_surface= TTF_RenderUTF8_Blended_Wrapped( font_, text.c_str(), font_color, c_window_width );
 
@@ -237,18 +243,34 @@ void DrawLevel(const LevelState& level_state )
 			SDL_FreeSurface(stage_text_surface);
 		}
 
-		DrawPath( level_state.level_data->root_path );
+		DrawPath( level_state, level_state.level_data->root_path );
 
 		{
-			const auto segment= level_state.level_data->root_path.rails.front();
 
-			const int x_offset= ( Images::rails_x->w - Images::tram->w ) / 2;
-			const int y_offset= ( Images::rails_x->h - Images::tram->h ) / 2;
+			const int sprite_x_offset= ( Images::rails_x->w - Images::tram->w ) / 2;
+			const int sprite_y_offset= ( Images::rails_x->h - Images::tram->h ) / 2;
+
+			const Level::Path& tram_path= *level_state.tram_state.current_path;
+			const size_t rail_segment_index= std::min( size_t(level_state.tram_state.path_progress), tram_path.rails.size() - 1u);
+			const float part= level_state.tram_state.path_progress - float(rail_segment_index);
+			const float part_minus_one= 1.0f - part;
+
+			float x, y;
+			if( rail_segment_index == tram_path.rails.size() - 1u )
+			{
+				x= tram_path.rails[rail_segment_index].x;
+				y= tram_path.rails[rail_segment_index].y;
+			}
+			else
+			{
+				x= tram_path.rails[rail_segment_index].x * part_minus_one + part * tram_path.rails[rail_segment_index+1u].x;
+				y= tram_path.rails[rail_segment_index].y * part_minus_one + part * tram_path.rails[rail_segment_index+1u].y;
+			}
 
 			SDL_Rect src_rect{ 0, 0, Images::tram->w, Images::tram->h };
 			SDL_Rect dst_rect{
-				segment.x * Images::rails_x->w * c_graphics_scale + x_offset * c_graphics_scale,
-				segment.y * Images::rails_x->h * c_graphics_scale + y_offset * c_graphics_scale,
+				int(x * Images::rails_x->w) * c_graphics_scale + sprite_x_offset * c_graphics_scale,
+				int(y * Images::rails_x->h) * c_graphics_scale + sprite_y_offset * c_graphics_scale,
 				Images::tram->w * c_graphics_scale,
 				Images::tram->h * c_graphics_scale };
 

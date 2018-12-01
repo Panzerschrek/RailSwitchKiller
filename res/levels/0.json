@@ -7,10 +7,18 @@
 	{
 		"rails" :
 		[
-			{ "x" : 0, "y" : 5, "direction" : "x" },
-			{ "x" : 1, "y" : 5, "direction" : "x" },
 			{ "x" : 2, "y" : 5, "direction" : "x" },
-			{ "x" : 3, "y" : 5, "direction" : "fork" }
+			{ "x" : 3, "y" : 5, "direction" : "x" },
+			{ "x" : 4, "y" : 5, "direction" : "x" },
+			{ "x" : 5, "y" : 5, "direction" : "x" },
+			{ "x" : 6, "y" : 5, "direction" : "x" },
+			{ "x" : 7, "y" : 5, "direction" : "x" },
+			{ "x" : 8, "y" : 5, "direction" : "x" },
+			{ "x" : 9, "y" : 5, "direction" : "x" },
+			{ "x" : 10, "y" : 5, "direction" : "x" },
+			{ "x" : 11, "y" : 5, "direction" : "x" },
+			{ "x" : 12, "y" : 5, "direction" : "x" },
+			{ "x" : 13, "y" : 5, "direction" : "fork" }
 		],
 
 		"fork" :
@@ -27,13 +35,14 @@
 
 				"rails" :
 				[
-					{ "x" : 3, "y" : 6, "direction" : "y" },
-					{ "x" : 3, "y" : 7, "direction" : "y" },
-					{ "x" : 3, "y" : 8, "direction" : "down_to_x" },
-					{ "x" : 4, "y" : 8, "direction" : "x" },
-					{ "x" : 5, "y" : 8, "direction" : "x" },
-					{ "x" : 6, "y" : 8, "direction" : "x" },
-					{ "x" : 7, "y" : 8, "direction" : "x" }
+					{ "x" : 13, "y" : 6, "direction" : "y" },
+					{ "x" : 13, "y" : 7, "direction" : "y" },
+					{ "x" : 13, "y" : 8, "direction" : "down_to_x" },
+					{ "x" : 14, "y" : 8, "direction" : "x" },
+					{ "x" : 15, "y" : 8, "direction" : "x" },
+					{ "x" : 16, "y" : 8, "direction" : "x" },
+					{ "x" : 17, "y" : 8, "direction" : "x" },
+					{ "x" : 18, "y" : 8, "direction" : "x" }
 				]
 			},
 
@@ -46,13 +55,14 @@
 
 				"rails" :
 				[
-					{ "x" : 3, "y" : 4, "direction" : "y" },
-					{ "x" : 3, "y" : 3, "direction" : "y" },
-					{ "x" : 3, "y" : 2, "direction" : "up_to_x" },
-					{ "x" : 4, "y" : 2, "direction" : "x" },
-					{ "x" : 5, "y" : 2, "direction" : "x" },
-					{ "x" : 6, "y" : 2, "direction" : "x" },
-					{ "x" : 7, "y" : 2, "direction" : "x" }
+					{ "x" : 13, "y" : 4, "direction" : "y" },
+					{ "x" : 13, "y" : 3, "direction" : "y" },
+					{ "x" : 13, "y" : 2, "direction" : "up_to_x" },
+					{ "x" : 14, "y" : 2, "direction" : "x" },
+					{ "x" : 15, "y" : 2, "direction" : "x" },
+					{ "x" : 16, "y" : 2, "direction" : "x" },
+					{ "x" : 17, "y" : 2, "direction" : "x" },
+					{ "x" : 18, "y" : 2, "direction" : "x" }
 				]
 			}
 		}

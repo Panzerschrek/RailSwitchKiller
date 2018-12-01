@@ -30,6 +30,12 @@ struct LevelState
 
 	std::unordered_map<const Level::Fork*, ForkState> forks_state;
 	std::unordered_map<const Victim*, ForkState> victims_state;
+
+	struct
+	{
+		const Level::Path* current_path= nullptr;
+		float path_progress= 0.0f; // В единицах рельсов
+	} tram_state;
 };
 
 struct InputEvent
