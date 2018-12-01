@@ -17,6 +17,7 @@ if( WIN32 )
 	get_filename_component( SDL_LIBS_DIR_ABSOLUTE ${SDL_LIBS_DIR} ABSOLUTE )
 else()
 	set( SDL_INCLUDES_DIR /usr/include/SDL2 )
+	set( SDL_IMAGE_INCLUDES_DIR /usr/include/SDL2 )
 endif()
 
 #
@@ -40,6 +41,8 @@ else()
 	target_link_libraries( Game pthread )
 	target_link_libraries( Game GL )
 	target_link_libraries( Game SDL2 )
+	target_link_libraries( Game SDL2_image )
 endif()
 
 target_include_directories( Game PRIVATE ${SDL_INCLUDES_DIR} )
+target_include_directories( Game PRIVATE ${SDL_IMAGE_INCLUDES_DIR} )

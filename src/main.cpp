@@ -1,14 +1,25 @@
 #include <iostream>
 #include <SDL.h>
+#include <SDL_image.h>
+
 
 // View
 const unsigned int c_window_width= 1024;
 const unsigned int c_window_height= 768;
 
+const int c_graphics_scale = 4;
+
 SDL_Window* window_= nullptr;
 SDL_Surface* surface_= nullptr;
 
 const unsigned char c_background_color[]= { 32, 32, 32 };
+
+namespace Images
+{
+
+SDL_Surface* rails= nullptr;
+
+}
 
 void InitWindow()
 {
@@ -38,10 +49,23 @@ void DeInitWindow()
 	SDL_DestroyWindow( window_ );
 }
 
+void LoadImages()
+{
+	Images::rails= IMG_Load( "res/rails.bmp" );
+}
+
 void Draw()
 {
 	const SDL_Rect bg_rect{ 0, 0, surface_->w, surface_->h };
 	SDL_FillRect( surface_, &bg_rect, SDL_MapRGB( surface_->format, c_background_color[0], c_background_color[1], c_background_color[2] ) );
+
+	{
+		SDL_Surface* const s= Images::rails;
+
+		SDL_Rect src_rect{ 0, 0, s->w, s->h };
+		SDL_Rect dst_rect{ 0, 0, s->w * c_graphics_scale, s->h * c_graphics_scale };
+		SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
+	}
 }
 
 void MainLoop()
@@ -83,7 +107,10 @@ int main()
 	std::cout<< "Test" << std::endl;
 
 	InitWindow();
+	LoadImages();
+
 	MainLoop();
+
 	DeInitWindow();
 
 	return 0;
