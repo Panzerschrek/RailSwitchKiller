@@ -25,6 +25,9 @@ SDL_Surface* rails_up_to_x= nullptr;
 SDL_Surface* rails_down_to_x= nullptr;
 SDL_Surface* rails_fork= nullptr;
 
+SDL_Surface* swith_off= nullptr;
+SDL_Surface* swith_on= nullptr;
+
 }
 
 struct RailSegment
@@ -83,6 +86,9 @@ void LoadImages()
 	Images::rails_up_to_x= IMG_Load( "res/rails_turn_up_to_x.bmp" );
 	Images::rails_down_to_x= IMG_Load( "res/rails_turn_down_to_x.bmp" );
 	Images::rails_fork= IMG_Load( "res/rails_fork.bmp" );
+
+	Images::swith_off= IMG_Load( "res/swith_off.bmp" );
+	Images::swith_on= IMG_Load( "res/swith_on.bmp" );
 }
 
 void FreeImages()
@@ -140,6 +146,22 @@ void Draw()
 
 			SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
 		}
+
+		auto time= SDL_GetTicks();
+
+		RailSegment segment;
+		segment.x= 4;
+		segment.y= 5;
+		SDL_Surface* s= ( (time / 1000)&1) ? Images::swith_off : Images::swith_on;
+
+		SDL_Rect src_rect{ 0, 0, s->w, s->h };
+		SDL_Rect dst_rect{
+			segment.x * s->w * c_graphics_scale,
+			segment.y * s->h * c_graphics_scale,
+			s->w * c_graphics_scale,
+			s->h * c_graphics_scale };
+
+		SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
 	}
 }
 
@@ -160,7 +182,8 @@ void MainLoop()
 
 		// Process events
 		SDL_Event event;
-		SDL_WaitEvent( &event ); // Wait for events. If there are no events - we can nothing to do.
+		SDL_Delay(1);
+		//SDL_WaitEvent( &event ); // Wait for events. If there are no events - we can nothing to do.
 		do
 		{
 			switch(event.type)
