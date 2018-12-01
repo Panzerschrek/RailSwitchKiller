@@ -18,6 +18,7 @@ if( WIN32 )
 else()
 	set( SDL_INCLUDES_DIR /usr/include/SDL2 )
 	set( SDL_IMAGE_INCLUDES_DIR /usr/include/SDL2 )
+	set( SDL_TTF_INCLUDES_DIR /usr/include/SDL2 )
 endif()
 
 #
@@ -62,8 +63,10 @@ else()
 	target_link_libraries( Game GL )
 	target_link_libraries( Game SDL2 )
 	target_link_libraries( Game SDL2_image )
+	target_link_libraries( Game SDL2_ttf )
 endif()
 
 target_include_directories( Game PRIVATE ${SDL_INCLUDES_DIR} )
 target_include_directories( Game PRIVATE ${SDL_IMAGE_INCLUDES_DIR} )
+target_include_directories( Game PRIVATE ${SDL_TTF_INCLUDES_DIR} )
 target_include_directories( Game PRIVATE PanzerJson/include )

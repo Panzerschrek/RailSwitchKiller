@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 
 #include "level.hpp"
 
@@ -13,6 +14,9 @@ const int c_graphics_scale = 4;
 
 SDL_Window* window_= nullptr;
 SDL_Surface* surface_= nullptr;
+TTF_Font* font_= nullptr;
+
+SDL_Surface* test_text_= nullptr;
 
 const unsigned char c_background_color[]= { 32, 32, 32 };
 
@@ -97,6 +101,22 @@ void FreeImages()
 	// TODO - free it
 }
 
+void InitFont()
+{
+	TTF_Init();
+
+	font_= TTF_OpenFont( "res/DejaVuSans.ttf", 20 );
+
+	SDL_Color color{ 240, 240, 240, 0 };
+	test_text_= TTF_RenderUTF8_Blended_Wrapped( font_, "Тестовый текст\nна несколько строк\nwith latin\nand utf ööüç characters!", color, c_window_width );
+}
+
+void DeInitFont()
+{
+	TTF_CloseFont( font_ );
+	TTF_Quit();
+}
+
 void DrawPath( const Level::Path& path )
 {
 	using Direction = Level::RailSegment::Direction;
@@ -175,6 +195,18 @@ void Draw()
 	SDL_FillRect( surface_, &bg_rect, SDL_MapRGB( surface_->format, c_background_color[0], c_background_color[1], c_background_color[2] ) );
 
 	DrawPath( current_level_.root_path );
+
+	{
+		SDL_Rect src_rect{ 0, 0, test_text_->w, test_text_->h };
+		SDL_Rect dst_rect{
+			100,
+			200,
+			test_text_->w,
+			test_text_->h };
+
+		SDL_UpperBlit( test_text_, &src_rect, surface_, &dst_rect );
+
+	}
 }
 
 void MainLoop()
@@ -194,7 +226,7 @@ void MainLoop()
 
 		// Process events
 		SDL_Event event;
-		SDL_Delay(1);
+		SDL_Delay(10);
 		//SDL_WaitEvent( &event ); // Wait for events. If there are no events - we can nothing to do.
 		do
 		{
@@ -214,15 +246,17 @@ void MainLoop()
 
 int main()
 {
-	std::cout<< "Test" << std::endl;
+	SDL_Init( SDL_INIT_AUDIO | SDL_INIT_VIDEO );
 
 	InitWindow();
 	LoadImages();
+	InitFont();
 
 	current_level_= LoadLevel(0);
 
 	MainLoop();
 
+	DeInitFont();
 	FreeImages();
 	DeInitWindow();
 
