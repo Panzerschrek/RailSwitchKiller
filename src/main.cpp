@@ -18,6 +18,8 @@ SDL_Surface* surface_= nullptr;
 TTF_Font* font_= nullptr;
 
 const unsigned char c_background_color[]= { 32, 32, 32 };
+const unsigned char c_level_tile_color_color[]= { 96, 32, 32 };
+const SDL_Color c_font_color{ 240, 240, 240, 0 };
 
 namespace Images
 {
@@ -238,12 +240,10 @@ void DrawLevel(const LevelState& level_state )
 	const SDL_Rect bg_rect{ 0, 0, surface_->w, surface_->h };
 	SDL_FillRect( surface_, &bg_rect, SDL_MapRGB( surface_->format, c_background_color[0], c_background_color[1], c_background_color[2] ) );
 
-	const SDL_Color font_color{ 240, 240, 240, 0 };
-
 	if( level_state.level_stage == LevelState::LevelStage::Intro )
 	{
 		SDL_Surface* const description_surface=
-			TTF_RenderUTF8_Blended_Wrapped( font_, level_state.level_data->description.c_str(), font_color, c_window_width );
+			TTF_RenderUTF8_Blended_Wrapped( font_, level_state.level_data->description.c_str(), c_font_color, c_window_width );
 
 		SDL_Rect src_rect{ 0, 0, description_surface->w, description_surface->h };
 
@@ -286,7 +286,7 @@ void DrawLevel(const LevelState& level_state )
 			text+= i < level_state.finish_state.stars ? u8"★" : u8"☆";
 
 		SDL_Surface* const finish_text_surface=
-			TTF_RenderUTF8_Blended_Wrapped( font_, text.c_str(), font_color, c_window_width / 3 );
+			TTF_RenderUTF8_Blended_Wrapped( font_, text.c_str(), c_font_color, c_window_width / 3 );
 
 		SDL_Rect src_rect{ 0, 0, finish_text_surface->w, finish_text_surface->h };
 
@@ -308,7 +308,7 @@ void DrawLevel(const LevelState& level_state )
 			else if( level_state.level_stage == LevelState::LevelStage::Action )
 				text= "Action!";
 
-			SDL_Surface* const stage_text_surface= TTF_RenderUTF8_Blended_Wrapped( font_, text.c_str(), font_color, c_window_width );
+			SDL_Surface* const stage_text_surface= TTF_RenderUTF8_Blended_Wrapped( font_, text.c_str(), c_font_color, c_window_width );
 
 			SDL_Rect src_rect{ 0, 0, stage_text_surface->w, stage_text_surface->h };
 
@@ -392,6 +392,52 @@ void DrawLevel(const LevelState& level_state )
 	}
 }
 
+void DrawIntermissionMenu(const IntermissionState& intermission_state)
+{
+	const SDL_Rect bg_rect{ 0, 0, surface_->w, surface_->h };
+	SDL_FillRect( surface_, &bg_rect, SDL_MapRGB( surface_->format, c_background_color[0], c_background_color[1], c_background_color[2] ) );
+
+	for( int i= 0; i < IntermissionState::c_level_count; ++i )
+	{
+		int x= i % IntermissionState::c_columns;
+		int y= i / IntermissionState::c_columns;
+
+		const SDL_Rect fill_rect{
+			( x * IntermissionState::c_tile_size + IntermissionState::c_tile_border / 2 ) * c_graphics_scale,
+			( y * IntermissionState::c_tile_size + IntermissionState::c_tile_border / 2 ) * c_graphics_scale,
+			( IntermissionState::c_tile_size - IntermissionState::c_tile_border ) * c_graphics_scale,
+			( IntermissionState::c_tile_size - IntermissionState::c_tile_border ) * c_graphics_scale };
+
+		// Rect.
+		SDL_FillRect( surface_, &fill_rect, SDL_MapRGB( surface_->format, c_level_tile_color_color[0], c_level_tile_color_color[1], c_level_tile_color_color[2] ) );
+
+		// Level caption.
+		std::string text= "level " + std::to_string(i) + "\n";
+		if( intermission_state.levels_state[i].completed )
+		{
+			for( int j= 0; j < 3; ++j )
+				text+= j < intermission_state.levels_state[i].stars ? u8"★" : u8"☆";
+		}
+		else
+			text+= "-";
+
+		auto color= c_font_color;
+		if( !intermission_state.levels_state[i].completed && i != intermission_state.first_incomplete_level )
+		{
+			color.r/= 2; color.g/= 2; color.b/= 2;
+		}
+
+		SDL_Surface* const caption_text_surface= TTF_RenderUTF8_Blended_Wrapped( font_, text.c_str(), color, c_window_width );
+
+		SDL_Rect caption_src_rect{ 0, 0, caption_text_surface->w, caption_text_surface->h };
+
+		SDL_Rect caption_dst_rect= fill_rect;
+
+		SDL_UpperBlit( caption_text_surface, &caption_src_rect, surface_, &caption_dst_rect );
+		SDL_FreeSurface(caption_text_surface);
+	}
+}
+
 std::vector<InputEvent> MainLoop()
 {
 	std::vector<InputEvent> input_events;
@@ -444,22 +490,56 @@ int main()
 	LoadImages();
 	InitFont();
 
-	RunLevel(
-		std::unique_ptr<Level>( new Level(LoadLevel(0) ),
-		MainLoop,
-		[]( const LevelState& level_state )
+	IntermissionState intermission_state;
+
+	while(true)
+	{
+		const int level_number=
+			RunIntermissionMenu(
+				intermission_state,
+				MainLoop,
+				[]( const IntermissionState& intermission_state )
+				{
+					if( SDL_MUSTLOCK( surface_ ) )
+						SDL_LockSurface( surface_ );
+
+					DrawIntermissionMenu(intermission_state);
+
+					if( SDL_MUSTLOCK( surface_ ) )
+						SDL_UnlockSurface( surface_ );
+
+					SDL_UpdateWindowSurface( window_ );
+				} );
+
+		if( level_number < 0 )
+			break;
+
+		const LevelState level_state=
+			RunLevel(
+				std::unique_ptr<Level>( new Level(LoadLevel(level_number) ) ),
+				MainLoop,
+				[]( const LevelState& level_state )
+				{
+					if( SDL_MUSTLOCK( surface_ ) )
+						SDL_LockSurface( surface_ );
+
+					DrawLevel(level_state);
+
+					if( SDL_MUSTLOCK( surface_ ) )
+						SDL_UnlockSurface( surface_ );
+
+					SDL_UpdateWindowSurface( window_ );
+				});
+
+		if( level_state.finish_state.aborted )
+			break;
+		if( !level_state.finish_state.map_failed )
 		{
-			if( SDL_MUSTLOCK( surface_ ) )
-				SDL_LockSurface( surface_ );
-
-			DrawLevel(level_state);
-
-			if( SDL_MUSTLOCK( surface_ ) )
-				SDL_UnlockSurface( surface_ );
-
-			SDL_UpdateWindowSurface( window_ );
-		});
-
+			intermission_state.levels_state[level_number].completed= true;
+			intermission_state.levels_state[level_number].stars= level_state.finish_state.stars;
+			intermission_state.first_incomplete_level= std::max( intermission_state.first_incomplete_level, level_number + 1 );
+		}
+	}
 
 	DeInitFont();
 	FreeImages();

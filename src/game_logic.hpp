@@ -1,4 +1,4 @@
-#include <functional>
+﻿#include <functional>
 #include <unordered_map>
 #include "level.hpp"
 
@@ -44,8 +44,26 @@ struct LevelState
 		int killed[int(Victim::Count)];
 		int stars= 0; // 0 - 3
 		bool map_failed= false;
+		bool aborted= false; // Player whants to quit.
 
 	} finish_state;
+};
+
+struct IntermissionState
+{
+	struct LevelState
+	{
+		int stars= 0; // 0 - 3
+		bool completed= false;
+	};
+
+	static constexpr int c_level_count= 20;
+	LevelState levels_state[20];
+	int first_incomplete_level= 0;
+
+	static constexpr int c_columns= 6;
+	static constexpr int c_tile_size= 40;
+	static constexpr int c_tile_border= 8;
 };
 
 struct InputEvent
@@ -61,6 +79,11 @@ struct InputEvent
 };
 
 using DrawLevelFunc= std::function< void(const LevelState&) >;
+using DrawIntermissionMenuFunc= std::function< void(const IntermissionState&) >;
 using MainLoopFunc= std::function< std::vector<InputEvent>() >;
 
 LevelState RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, DrawLevelFunc draw_level_func );
+int RunIntermissionMenu(
+	const IntermissionState& intermission_state,
+	MainLoopFunc main_loop_func,
+	DrawIntermissionMenuFunc draw_intermission_menu_func );

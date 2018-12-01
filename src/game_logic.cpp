@@ -168,9 +168,12 @@ LevelState RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, 
 					level_state.level_stage= LevelState::LevelStage::Countdown;
 					stage_start_time= tick_time;
 				}
+				else if( level_state.level_stage == LevelState::LevelStage::Finish )
+					return level_state;
 				break;
 
 			case InputEvent::Kind::Quit:
+				level_state.finish_state.aborted= true;
 				return level_state;
 			};
 		}
@@ -227,4 +230,56 @@ LevelState RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, 
 	}
 
 	return level_state;
+}
+
+int GetLevelForCLick( int click_x, int click_y )
+{
+	for( int i= 0; i < IntermissionState::c_level_count; ++i )
+	{
+		int x= i % IntermissionState::c_columns;
+		int y= i / IntermissionState::c_columns;
+
+		int x_min= x * IntermissionState::c_tile_size + IntermissionState::c_tile_border / 2;
+		int y_min= y * IntermissionState::c_tile_size + IntermissionState::c_tile_border / 2;
+		int size= IntermissionState::c_tile_size - IntermissionState::c_tile_border;
+
+		if( click_x >= x_min && click_y >= y_min && click_x < x_min + size && click_y < y_min + size )
+			return i;
+	}
+
+	return -1;
+}
+
+int RunIntermissionMenu(
+	const IntermissionState& intermission_state,
+	MainLoopFunc main_loop_func,
+	DrawIntermissionMenuFunc draw_intermission_menu_func )
+{
+	while(true)
+	{
+		for( const InputEvent& input_event : main_loop_func() )
+		{
+			switch(input_event.kind)
+			{
+			case InputEvent::Kind::Mouse:
+			{
+				int level= GetLevelForCLick( input_event.x, input_event.y );
+				if( level >= 0 && level < IntermissionState::c_level_count &&
+					level <= intermission_state.first_incomplete_level )
+					return level;
+			}
+				break;
+
+			case InputEvent::Kind::Key:
+				break;
+
+			case InputEvent::Kind::Quit:
+				return -1;
+			};
+		}
+
+		draw_intermission_menu_func(intermission_state);
+	}
+
+	return -1;
 }
