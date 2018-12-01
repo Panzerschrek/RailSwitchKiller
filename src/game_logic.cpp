@@ -66,7 +66,7 @@ int ScoreForVictim( const Victim victim )
 	case Victim::CivilianOldster: return 50;
 	case Victim::Liar: return 30;
 	case Victim::Thief: return 10;
-	case Victim::Murder: return -100;
+	case Victim::Murderer: return -100;
 	case Victim::Rapist: return -50;
 	case Victim::Maniac: return -200;
 	case Victim::Capitalist: return -500;
@@ -102,15 +102,25 @@ std::pair<int, int> CalculateWorstAndBestScore( const Level::Path& path )
 
 void CalculateFinisScore( LevelState& level_state )
 {
+	for( auto& count : level_state.finish_state.intial_count )
+		count= 0;
+	for( auto& count : level_state.finish_state.killed )
+		count= 0;
+
 	const std::pair<int, int> worst_and_best_score= CalculateWorstAndBestScore( level_state.level_data->root_path );
 
 	int score= 0;
 	for( const auto& victim_pair : level_state.victims_state )
 	{
+		++level_state.finish_state.intial_count[ int(*victim_pair.first) ];
+
 		// Получаем штрафы только за убитых.
 		// Если у нас есть награда за убийство, то выгодно будет убивать некоторых, чем оставлять в живых.
 		if( victim_pair.second == LevelState::VictimState::Dead )
+		{
 			score+= ScoreForVictim( *victim_pair.first );
+			++level_state.finish_state.killed[ int(*victim_pair.first) ];
+		}
 	}
 
 	if( score == worst_and_best_score.first )
@@ -132,7 +142,7 @@ void CalculateFinisScore( LevelState& level_state )
 	}
 }
 
-void RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, DrawLevelFunc draw_level_func )
+LevelState RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, DrawLevelFunc draw_level_func )
 {
 	LevelState level_state= InitLevelState(std::move(level));
 
@@ -161,7 +171,7 @@ void RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, DrawLe
 				break;
 
 			case InputEvent::Kind::Quit:
-				return;
+				return level_state;
 			};
 		}
 
@@ -215,4 +225,6 @@ void RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, DrawLe
 
 		prev_tick_time= tick_time;
 	}
+
+	return level_state;
 }

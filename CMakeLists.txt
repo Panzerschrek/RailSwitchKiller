@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(ProjectName)
+project(RailSwitchKiller)
 
 set( CMAKE_CXX_STANDARD 11 )
 
@@ -20,10 +20,6 @@ else()
 	set( SDL_IMAGE_INCLUDES_DIR /usr/include/SDL2 )
 	set( SDL_TTF_INCLUDES_DIR /usr/include/SDL2 )
 endif()
-
-#
-# HexLib
-#
 
 set( SOURCES
 	src/game_logic.cpp

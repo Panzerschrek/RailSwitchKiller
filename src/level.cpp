@@ -15,7 +15,7 @@ Level::Path ParsePath( const PanzerJson::Value& path_json )
 		else if( PanzerJson::StringCompare( victim_name, "liar" ) == 0 )
 			result.path_victims.push_back( Victim::Liar );
 		else if( PanzerJson::StringCompare( victim_name, "murder" ) == 0 )
-			result.path_victims.push_back( Victim::Murder );
+			result.path_victims.push_back( Victim::Murderer );
 		else
 			std::cout << "unsupported victim: " << victim_name << std::endl;
 	}

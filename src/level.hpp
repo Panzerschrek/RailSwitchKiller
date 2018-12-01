@@ -10,7 +10,7 @@ enum class Victim
 	CivilianOldster,
 	Liar,
 	Thief,
-	Murder,
+	Murderer,
 	Rapist,
 	Maniac, // rapist + murder
 	Capitalist,

@@ -256,6 +256,49 @@ void DrawLevel(const LevelState& level_state )
 		SDL_UpperBlit( description_surface, &src_rect, surface_, &dst_rect );
 		SDL_FreeSurface(description_surface);
 	}
+	else if( level_state.level_stage == LevelState::LevelStage::Finish )
+	{
+		std::string text= u8"Уровень пройден.\nУбито:\n";
+		for( int i= 0; i < int(Victim::Count); ++i )
+		{
+			if( level_state.finish_state.intial_count[i] == 0 )
+				continue;
+
+			std::string name;
+			switch( Victim(i) )
+			{
+			case Victim::Civilian: name= u8"Гражданский"; break;
+			case Victim::CivilianChild: name= u8"Ребёнок"; break;
+			case Victim::CivilianOldster: name= u8"Старик"; break;
+			case Victim::Liar: name= u8"Лжец"; break;
+			case Victim::Thief: name= u8"Вор"; break;
+			case Victim::Murderer: name= u8"Убийца"; break;
+			case Victim::Rapist: name= u8"Насильник"; break;
+			case Victim::Maniac: name= u8"Маньяк"; break;
+			case Victim::Capitalist: name= u8"Капиталист"; break;
+			case Victim::Count: break;
+			};
+
+			text+= "  " + name + " - " + std::to_string(level_state.finish_state.killed[i]) + "/" + std::to_string(level_state.finish_state.intial_count[0]) + "\n";
+		}
+		text+= u8"Счёт: ";
+		for( int i= 0; i < 3; ++i )
+			text+= i < level_state.finish_state.stars ? u8"★" : u8"☆";
+
+		SDL_Surface* const finish_text_surface=
+			TTF_RenderUTF8_Blended_Wrapped( font_, text.c_str(), font_color, c_window_width / 3 );
+
+		SDL_Rect src_rect{ 0, 0, finish_text_surface->w, finish_text_surface->h };
+
+		SDL_Rect dst_rect{
+			( surface_->w - finish_text_surface->w ) / 2,
+			( surface_->h - finish_text_surface->h ) / 2,
+			finish_text_surface->w,
+			finish_text_surface->h };
+
+		SDL_UpperBlit( finish_text_surface, &src_rect, surface_, &dst_rect );
+		SDL_FreeSurface(finish_text_surface);
+	}
 	else
 	{
 		{ // draw stage info
@@ -264,8 +307,6 @@ void DrawLevel(const LevelState& level_state )
 				text= std::to_string(level_state.countdown_time_left_s) + "...";
 			else if( level_state.level_stage == LevelState::LevelStage::Action )
 				text= "Action!";
-			else if( level_state.level_stage == LevelState::LevelStage::Finish )
-				text= "Finish!";
 
 			SDL_Surface* const stage_text_surface= TTF_RenderUTF8_Blended_Wrapped( font_, text.c_str(), font_color, c_window_width );
 
@@ -404,7 +445,7 @@ int main()
 	InitFont();
 
 	RunLevel(
-		std::unique_ptr<Level>( new Level(LoadLevel(0)) ),
+		std::unique_ptr<Level>( new Level(LoadLevel(0) ),
 		MainLoop,
 		[]( const LevelState& level_state )
 		{

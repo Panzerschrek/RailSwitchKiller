@@ -40,6 +40,7 @@ struct LevelState
 
 	struct
 	{
+		int intial_count[int(Victim::Count)];
 		int killed[int(Victim::Count)];
 		int stars= 0; // 0 - 3
 		bool map_failed= false;
@@ -62,4 +63,4 @@ struct InputEvent
 using DrawLevelFunc= std::function< void(const LevelState&) >;
 using MainLoopFunc= std::function< std::vector<InputEvent>() >;
 
-void RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, DrawLevelFunc draw_level_func );
+LevelState RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, DrawLevelFunc draw_level_func );
