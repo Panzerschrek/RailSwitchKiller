@@ -74,6 +74,17 @@ void LoadImages()
 
 	Images::swith_off= IMG_Load( "res/swith_off.bmp" );
 	Images::swith_on= IMG_Load( "res/swith_on.bmp" );
+
+	auto transparent_color_key= SDL_MapRGB( surface_->format, 0, 0, 0 );
+	SDL_SetColorKey( Images::rails_x, 1, transparent_color_key );
+	SDL_SetColorKey( Images::rails_y, 1, transparent_color_key );
+	SDL_SetColorKey( Images::rails_x_to_up, 1, transparent_color_key );
+	SDL_SetColorKey( Images::rails_x_to_down, 1, transparent_color_key );
+	SDL_SetColorKey( Images::rails_up_to_x, 1, transparent_color_key );
+	SDL_SetColorKey( Images::rails_down_to_x, 1, transparent_color_key );
+	SDL_SetColorKey( Images::rails_fork, 1, transparent_color_key );
+	SDL_SetColorKey( Images::swith_off, 1, transparent_color_key );
+	SDL_SetColorKey( Images::swith_on, 1, transparent_color_key );
 }
 
 void FreeImages()
