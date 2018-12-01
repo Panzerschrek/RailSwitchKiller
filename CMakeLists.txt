@@ -29,8 +29,27 @@ set( SOURCES
 	)
 
 set( HEADERS
-	 )
-	
+	src/level.hpp )
+
+set( PANZER_JSON_HEADERS
+	PanzerJson/include/PanzerJson/fwd.hpp
+	PanzerJson/include/PanzerJson/value.hpp
+	PanzerJson/include/PanzerJson/value.inl
+	PanzerJson/include/PanzerJson/parser.hpp
+	PanzerJson/include/PanzerJson/serializer.hpp
+	PanzerJson/include/PanzerJson/serializer.inl
+	PanzerJson/include/PanzerJson/streamed_serializer.hpp
+	PanzerJson/include/PanzerJson/streamed_serializer.inl )
+
+set( PANZER_JSON_SOURCES
+	PanzerJson/src/panzer_json_assert.hpp
+	PanzerJson/src/parser.cpp
+	PanzerJson/src/serializer.cpp
+	PanzerJson/src/serializers_common.cpp
+	PanzerJson/src/serializers_common.hpp
+	PanzerJson/src/serializers_common.inl
+	PanzerJson/src/value.cpp )
+
 add_executable( Game ${SOURCES} ${HEADERS} )
 
 if( WIN32 )
@@ -46,3 +65,4 @@ endif()
 
 target_include_directories( Game PRIVATE ${SDL_INCLUDES_DIR} )
 target_include_directories( Game PRIVATE ${SDL_IMAGE_INCLUDES_DIR} )
+target_include_directories( Game PRIVATE PanzerJson/include )
