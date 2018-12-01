@@ -1,0 +1,3 @@
+[submodule "PanzerJson"]
+	path = PanzerJson
+	url = https://github.com/Panzerschrek/PanzerJson
