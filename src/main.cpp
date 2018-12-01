@@ -342,6 +342,13 @@ std::vector<InputEvent> MainLoop()
 				input_events.back().kind= InputEvent::Kind::Key;
 			}
 			break;
+
+		case SDL_MOUSEBUTTONDOWN:
+			input_events.emplace_back();
+			input_events.back().kind= InputEvent::Kind::Mouse;
+			input_events.back().x= event.button.x / c_graphics_scale;
+			input_events.back().y= event.button.y / c_graphics_scale;
+			break;
 		}
 	} while( SDL_PollEvent(&event) );
 

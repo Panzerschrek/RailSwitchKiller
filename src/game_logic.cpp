@@ -5,6 +5,7 @@ namespace Constants
 {
 
 const float tram_speed= 2.0f;
+const int tile_size= 16;
 
 }
 
@@ -34,6 +35,25 @@ LevelState InitLevelState( std::unique_ptr<Level> level )
 	return level_state;
 }
 
+void TryChangeForkState( const int click_tile_x, const int click_tile_y, LevelState& level_state, const Level::Path& path )
+{
+	if( path.fork != nullptr )
+	{
+		if( click_tile_x == path.rails.back().x + 1 &&
+			click_tile_y == path.rails.back().y )
+		{
+			LevelState::ForkState& fork_state= level_state.forks_state[ path.fork.get() ];
+			if( fork_state == LevelState::ForkState::Down )
+				fork_state= LevelState::ForkState::Up;
+			else
+				fork_state= LevelState::ForkState::Down;
+		}
+
+		TryChangeForkState( click_tile_x, click_tile_y, level_state, path.fork->lower_path );
+		TryChangeForkState( click_tile_x, click_tile_y, level_state, path.fork->upper_path );
+	}
+}
+
 void RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, DrawLevelFunc draw_level_func )
 {
 	LevelState level_state= InitLevelState(std::move(level));
@@ -49,15 +69,19 @@ void RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, DrawLe
 		{
 			switch(input_event.kind)
 			{
-			case InputEvent::Kind::Mouse: break;
+			case InputEvent::Kind::Mouse:
+				if( level_state.level_stage == LevelState::LevelStage::Countdown )
+					TryChangeForkState( input_event.x / Constants::tile_size, input_event.y / Constants::tile_size, level_state, level_state.level_data->root_path );
+				break;
+
 			case InputEvent::Kind::Key:
 				if( level_state.level_stage == LevelState::LevelStage::Intro )
 				{
 					level_state.level_stage= LevelState::LevelStage::Countdown;
 					stage_start_time= tick_time;
 				}
-
 				break;
+
 			case InputEvent::Kind::Quit:
 				return;
 			};
