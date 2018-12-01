@@ -8,3 +8,8 @@ Na každom puti jestj (ili net) lüdu, každyi iz kotoryh možet bytj ili obycny
 Grafika - železnodorožnyje puti, pojezd, lüdi, pereklücatelj.
 
 Nado napisatj kod, kotoryj umejet zagružatj i risovatj grafiku, rabotatj so vvodom, kod igrovoj logiki.
+
+Çelovecki:
+seryj - graždanskij
+Tömno-zelönyj - ubijça
+Rozovyj - nasiljnik

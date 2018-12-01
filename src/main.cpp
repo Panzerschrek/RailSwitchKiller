@@ -30,6 +30,8 @@ SDL_Surface* rails_fork= nullptr;
 SDL_Surface* swith_off= nullptr;
 SDL_Surface* swith_on= nullptr;
 
+SDL_Surface* victim_civilian= nullptr;
+
 }
 
 Level current_level_;
@@ -75,6 +77,8 @@ void LoadImages()
 	Images::swith_off= IMG_Load( "res/swith_off.bmp" );
 	Images::swith_on= IMG_Load( "res/swith_on.bmp" );
 
+	Images::victim_civilian= IMG_Load( "res/victim_civilian.bmp" );
+
 	auto transparent_color_key= SDL_MapRGB( surface_->format, 0, 0, 0 );
 	SDL_SetColorKey( Images::rails_x, 1, transparent_color_key );
 	SDL_SetColorKey( Images::rails_y, 1, transparent_color_key );
@@ -85,6 +89,7 @@ void LoadImages()
 	SDL_SetColorKey( Images::rails_fork, 1, transparent_color_key );
 	SDL_SetColorKey( Images::swith_off, 1, transparent_color_key );
 	SDL_SetColorKey( Images::swith_on, 1, transparent_color_key );
+	SDL_SetColorKey( Images::victim_civilian, 1, transparent_color_key );
 }
 
 void FreeImages()
@@ -96,28 +101,48 @@ void DrawPath( const Level::Path& path )
 {
 	using Direction = Level::RailSegment::Direction;
 
+	size_t number= 0;
 	for( const Level::RailSegment& segment : path.rails )
 	{
-		SDL_Surface* s= nullptr;
+		SDL_Surface* rail_surface= nullptr;
 		switch(segment.direction)
 		{
-		case Direction::X: s= Images::rails_x; break;
-		case Direction::Y: s= Images::rails_y; break;
-		case Direction::XToUp: s= Images::rails_x_to_up; break;
-		case Direction::XToDown: s= Images::rails_x_to_down; break;
-		case Direction::UpToX: s= Images::rails_up_to_x; break;
-		case Direction::DownToX:  s= Images::rails_down_to_x; break;
-		case Direction::Fork:  s= Images::rails_fork; break;
+		case Direction::X: rail_surface= Images::rails_x; break;
+		case Direction::Y: rail_surface= Images::rails_y; break;
+		case Direction::XToUp: rail_surface= Images::rails_x_to_up; break;
+		case Direction::XToDown: rail_surface= Images::rails_x_to_down; break;
+		case Direction::UpToX: rail_surface= Images::rails_up_to_x; break;
+		case Direction::DownToX:  rail_surface= Images::rails_down_to_x; break;
+		case Direction::Fork:  rail_surface= Images::rails_fork; break;
 		};
 
-		SDL_Rect src_rect{ 0, 0, s->w, s->h };
+		SDL_Rect src_rect{ 0, 0, rail_surface->w, rail_surface->h };
 		SDL_Rect dst_rect{
-			segment.x * s->w * c_graphics_scale,
-			segment.y * s->h * c_graphics_scale,
-			s->w * c_graphics_scale,
-			s->h * c_graphics_scale };
+			segment.x * rail_surface->w * c_graphics_scale,
+			segment.y * rail_surface->h * c_graphics_scale,
+			rail_surface->w * c_graphics_scale,
+			rail_surface->h * c_graphics_scale };
 
-		SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
+		SDL_UpperBlitScaled( rail_surface, &src_rect, surface_, &dst_rect );
+
+		if( path.path_victims.size() > 0u && path.path_victims.size() >= path.rails.size() - number )
+		{
+			SDL_Surface* s= Images::victim_civilian;
+
+			const int x_offset= ( rail_surface->w - s->w ) / 2;
+			const int y_offset= ( rail_surface->h - s->h ) / 2;
+
+			SDL_Rect src_rect{ 0, 0, s->w, s->h };
+			SDL_Rect dst_rect{
+				segment.x * rail_surface->w * c_graphics_scale + x_offset * c_graphics_scale,
+				segment.y * rail_surface->h * c_graphics_scale + y_offset * c_graphics_scale,
+				s->w * c_graphics_scale,
+				s->h * c_graphics_scale };
+
+			SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
+		}
+
+		++number;
 	}
 
 	if( path.fork != nullptr )
