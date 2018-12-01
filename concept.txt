@@ -1,0 +1,10 @@
+Igra bazirujetsä na izvestnoj moraljnoj zadace - nažatj li na rycag, ili net, ctoby perenapravitj vagon.
+
+Možno sdelatj igru, gde nado vypolnitj çepj rešenij po nažatiju rycaga.
+Jestj vplotj do cetyröh putej, po kotorym možno napravitj rycag.
+Na každom puti jestj (ili net) lüdu, každyi iz kotoryh možet bytj ili obycnym celevekom, ili nehorošim (ubijçej, nasiljnikom, vorom i t. d.)
+
+
+Grafika - železnodorožnyje puti, pojezd, lüdi, pereklücatelj.
+
+Nado napisatj kod, kotoryj umejet zagružatj i risovatj grafiku, rabotatj so vvodom, kod igrovoj logiki.
