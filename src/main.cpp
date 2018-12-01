@@ -38,7 +38,7 @@ Level current_level_;
 void InitWindow()
 {
 	window_= SDL_CreateWindow(
-		"Game",
+		u8"Стрелочный убийца",
 		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
 		c_window_width, c_window_height,
 		0 );
