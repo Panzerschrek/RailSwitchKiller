@@ -60,3 +60,5 @@ public:
 
 	Path root_path;
 };
+
+Level LoadLevel( int number );

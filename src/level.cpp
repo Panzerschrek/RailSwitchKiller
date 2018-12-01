@@ -72,3 +72,36 @@ Level ParseLevel( const PanzerJson::Value& level_json )
 
 	return result;
 }
+
+
+Level LoadLevel( int number )
+{
+	Level result;
+
+	const std::string file_name= "res/levels/" + std::to_string(number) + ".json";
+
+	std::FILE* const f= std::fopen( file_name.c_str() , "rb" );
+	if( f == nullptr )
+	{
+		std::cout << "Can not open file " << file_name << std::endl;
+		return result;
+	}
+
+	std::fseek( f, 0, SEEK_END );
+	const size_t file_size= std::ftell( f );
+	std::fseek( f, 0, SEEK_SET );
+
+	std::vector<char> file_content( file_size );
+	std::fread( file_content.data(), 1, file_size, f ); // TODO - check file errors
+	std::fclose(f);
+
+	const PanzerJson::Parser::ResultPtr parse_result=
+		PanzerJson::Parser().Parse( file_content.data(), file_content.size() );
+	if(  parse_result->error != PanzerJson::Parser::Result::Error::NoError )
+	{
+		std::cout << "Error, parsing json" << std::endl;
+		return result;
+	}
+
+	return ParseLevel( parse_result->root );
+}
