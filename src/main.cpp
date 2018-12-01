@@ -36,6 +36,8 @@ SDL_Surface* swith_on= nullptr;
 
 SDL_Surface* victim_civilian= nullptr;
 
+SDL_Surface* tram= nullptr;
+
 }
 
 Level current_level_;
@@ -83,6 +85,8 @@ void LoadImages()
 
 	Images::victim_civilian= IMG_Load( "res/victim_civilian.bmp" );
 
+	Images::tram= IMG_Load( "res/tram.bmp" );
+
 	auto transparent_color_key= SDL_MapRGB( surface_->format, 0, 0, 0 );
 	SDL_SetColorKey( Images::rails_x, 1, transparent_color_key );
 	SDL_SetColorKey( Images::rails_y, 1, transparent_color_key );
@@ -94,6 +98,7 @@ void LoadImages()
 	SDL_SetColorKey( Images::swith_off, 1, transparent_color_key );
 	SDL_SetColorKey( Images::swith_on, 1, transparent_color_key );
 	SDL_SetColorKey( Images::victim_civilian, 1, transparent_color_key );
+	SDL_SetColorKey( Images::tram, 1, transparent_color_key );
 }
 
 void FreeImages()
@@ -196,6 +201,21 @@ void Draw()
 
 	DrawPath( current_level_.root_path );
 
+	{
+		const auto segment= current_level_.root_path.rails.front();
+
+		const int x_offset= ( Images::rails_x->w - Images::tram->w ) / 2;
+		const int y_offset= ( Images::rails_x->h - Images::tram->h ) / 2;
+
+		SDL_Rect src_rect{ 0, 0, Images::tram->w, Images::tram->h };
+		SDL_Rect dst_rect{
+			segment.x * Images::rails_x->w * c_graphics_scale + x_offset * c_graphics_scale,
+			segment.y * Images::rails_x->h * c_graphics_scale + y_offset * c_graphics_scale,
+			Images::tram->w * c_graphics_scale,
+			Images::tram->h * c_graphics_scale };
+
+		SDL_UpperBlitScaled( Images::tram, &src_rect, surface_, &dst_rect );
+	}
 	{
 		SDL_Rect src_rect{ 0, 0, test_text_->w, test_text_->h };
 		SDL_Rect dst_rect{
