@@ -17,9 +17,34 @@ const unsigned char c_background_color[]= { 32, 32, 32 };
 namespace Images
 {
 
-SDL_Surface* rails= nullptr;
+SDL_Surface* rails_x= nullptr;
+SDL_Surface* rails_y= nullptr;
+SDL_Surface* rails_x_to_up= nullptr;
+SDL_Surface* rails_x_to_down= nullptr;
+SDL_Surface* rails_up_to_x= nullptr;
+SDL_Surface* rails_down_to_x= nullptr;
+SDL_Surface* rails_fork= nullptr;
 
 }
+
+struct RailSegment
+{
+	enum class Direction
+	{
+		X,
+		Y,
+		XToUp,
+		XToDown,
+		UpToX,
+		DownToX,
+		Fork,
+	};
+
+	int x;
+	int y;
+	Direction direction;
+
+};
 
 void InitWindow()
 {
@@ -51,7 +76,18 @@ void DeInitWindow()
 
 void LoadImages()
 {
-	Images::rails= IMG_Load( "res/rails.bmp" );
+	Images::rails_x= IMG_Load( "res/rails_x.bmp" );
+	Images::rails_y= IMG_Load( "res/rails_y.bmp" );
+	Images::rails_x_to_up= IMG_Load( "res/rails_turn_up.bmp" );
+	Images::rails_x_to_down= IMG_Load( "res/rails_turn_down.bmp" );
+	Images::rails_up_to_x= IMG_Load( "res/rails_turn_up_to_x.bmp" );
+	Images::rails_down_to_x= IMG_Load( "res/rails_turn_down_to_x.bmp" );
+	Images::rails_fork= IMG_Load( "res/rails_fork.bmp" );
+}
+
+void FreeImages()
+{
+	// TODO - free it
 }
 
 void Draw()
@@ -59,12 +95,51 @@ void Draw()
 	const SDL_Rect bg_rect{ 0, 0, surface_->w, surface_->h };
 	SDL_FillRect( surface_, &bg_rect, SDL_MapRGB( surface_->format, c_background_color[0], c_background_color[1], c_background_color[2] ) );
 
+	static const RailSegment way[]
 	{
-		SDL_Surface* const s= Images::rails;
+		RailSegment{ 0, 5, RailSegment::Direction::X, },
+		RailSegment{ 1, 5, RailSegment::Direction::X, },
+		RailSegment{ 2, 5, RailSegment::Direction::X, },
+		RailSegment{ 3, 5, RailSegment::Direction::Fork, },
 
-		SDL_Rect src_rect{ 0, 0, s->w, s->h };
-		SDL_Rect dst_rect{ 0, 0, s->w * c_graphics_scale, s->h * c_graphics_scale };
-		SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
+		RailSegment{ 3, 4, RailSegment::Direction::Y, },
+		RailSegment{ 3, 3, RailSegment::Direction::Y, },
+		RailSegment{ 3, 2, RailSegment::Direction::UpToX, },
+		RailSegment{ 4, 2, RailSegment::Direction::X, },
+		RailSegment{ 5, 2, RailSegment::Direction::XToDown, },
+		RailSegment{ 5, 3, RailSegment::Direction::Y, },
+
+		RailSegment{ 3, 6, RailSegment::Direction::Y, },
+		RailSegment{ 3, 7, RailSegment::Direction::Y, },
+		RailSegment{ 3, 8, RailSegment::Direction::DownToX, },
+		RailSegment{ 4, 8, RailSegment::Direction::X, },
+		RailSegment{ 5, 8, RailSegment::Direction::XToUp, },
+		RailSegment{ 5, 7, RailSegment::Direction::Y, },
+	};
+	{
+		for( const RailSegment& segment : way )
+		{
+			SDL_Surface* s= nullptr;
+			switch(segment.direction)
+			{
+			case RailSegment::Direction::X: s= Images::rails_x; break;
+			case RailSegment::Direction::Y:  s= Images::rails_y; break;
+			case RailSegment::Direction::XToUp: s= Images::rails_x_to_up; break;
+			case RailSegment::Direction::XToDown: s= Images::rails_x_to_down; break;
+			case RailSegment::Direction::UpToX: s= Images::rails_up_to_x; break;
+			case RailSegment::Direction::DownToX:  s= Images::rails_down_to_x; break;
+			case RailSegment::Direction::Fork:  s= Images::rails_fork; break;
+			};
+
+			SDL_Rect src_rect{ 0, 0, s->w, s->h };
+			SDL_Rect dst_rect{
+				segment.x * s->w * c_graphics_scale,
+				segment.y * s->h * c_graphics_scale,
+				s->w * c_graphics_scale,
+				s->h * c_graphics_scale };
+
+			SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
+		}
 	}
 }
 
@@ -111,6 +186,7 @@ int main()
 
 	MainLoop();
 
+	FreeImages();
 	DeInitWindow();
 
 	return 0;
