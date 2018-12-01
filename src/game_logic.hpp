@@ -36,6 +36,14 @@ struct LevelState
 		const Level::Path* current_path= nullptr;
 		float path_progress= 0.0f; // В единицах рельсов
 	} tram_state;
+
+	struct
+	{
+		int killed[int(Victim::Count)];
+		int stars= 0; // 0 - 3
+		bool map_failed= false;
+
+	} finish_state;
 };
 
 struct InputEvent

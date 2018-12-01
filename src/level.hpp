@@ -15,6 +15,8 @@ enum class Victim
 	Maniac, // rapist + murder
 	Capitalist,
 	// TODO - add more victims
+
+	Count,
 };
 
 struct Level

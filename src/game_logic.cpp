@@ -4,7 +4,7 @@
 namespace Constants
 {
 
-const float tram_speed= 2.0f;
+const float tram_speed= 3.0f;
 const int tile_size= 16;
 
 }
@@ -51,6 +51,84 @@ void TryChangeForkState( const int click_tile_x, const int click_tile_y, LevelSt
 
 		TryChangeForkState( click_tile_x, click_tile_y, level_state, path.fork->lower_path );
 		TryChangeForkState( click_tile_x, click_tile_y, level_state, path.fork->upper_path );
+	}
+}
+
+int ScoreForVictim( const Victim victim )
+{
+	// Здесь сосредоточены веса за убийства всех персонажей.
+	// Чем меньше наберёт игрок штрафных баллов - тем лучше.
+
+	switch(victim)
+	{
+	case Victim::Civilian: return 100;
+	case Victim::CivilianChild: return 200;
+	case Victim::CivilianOldster: return 50;
+	case Victim::Liar: return 30;
+	case Victim::Thief: return 10;
+	case Victim::Murder: return -100;
+	case Victim::Rapist: return -50;
+	case Victim::Maniac: return -200;
+	case Victim::Capitalist: return -500;
+
+	case Victim::Count:
+		break;
+	};
+
+	return 0;
+}
+
+// Возвращает пару максимальный + минимальный штрафы за проезд участка пути.
+std::pair<int, int> CalculateWorstAndBestScore( const Level::Path& path )
+{
+	int path_score= 0;
+	for( const Victim& victim : path.path_victims )
+		path_score+= ScoreForVictim(victim);
+
+	std::pair<int, int> result;
+	result.first= result.second= path_score;
+
+	if( path.fork != nullptr )
+	{
+		std::pair<int, int> lower_result= CalculateWorstAndBestScore( path.fork->lower_path );
+		std::pair<int, int> upper_result= CalculateWorstAndBestScore( path.fork->upper_path );
+
+		result.first+= std::min( lower_result.first, upper_result.first );
+		result.second+= std::max( lower_result.second, upper_result.first );
+	}
+
+	return result;
+}
+
+void CalculateFinisScore( LevelState& level_state )
+{
+	const std::pair<int, int> worst_and_best_score= CalculateWorstAndBestScore( level_state.level_data->root_path );
+
+	int score= 0;
+	for( const auto& victim_pair : level_state.victims_state )
+	{
+		// Получаем штрафы только за убитых.
+		// Если у нас есть награда за убийство, то выгодно будет убивать некоторых, чем оставлять в живых.
+		if( victim_pair.second == LevelState::VictimState::Dead )
+			score+= ScoreForVictim( *victim_pair.first );
+	}
+
+	if( score == worst_and_best_score.first )
+	{
+		// Набрали минимум - это победа
+		level_state.finish_state.stars= 3;
+		level_state.finish_state.map_failed= false;
+	}
+	else if( score == worst_and_best_score.second )
+	{
+		// Набрали максимум - это проигрыш
+		level_state.finish_state.stars= 0;
+		level_state.finish_state.map_failed= true;
+	}
+	else
+	{
+		level_state.finish_state.map_failed= false;
+		level_state.finish_state.stars= 3 * ( score - worst_and_best_score.first ) / ( worst_and_best_score.second - worst_and_best_score.first );
 	}
 }
 
@@ -119,6 +197,7 @@ void RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, DrawLe
 				{
 					// Приехали
 					level_state.level_stage= LevelState::LevelStage::Finish;
+					CalculateFinisScore( level_state );
 				}
 			}
 			else
