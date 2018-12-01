@@ -41,3 +41,5 @@ else()
 	target_link_libraries( Game GL )
 	target_link_libraries( Game SDL2 )
 endif()
+
+target_include_directories( Game PRIVATE ${SDL_INCLUDES_DIR} )
