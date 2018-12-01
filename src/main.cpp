@@ -34,7 +34,6 @@ SDL_Surface* swith_on= nullptr;
 
 Level current_level_;
 
-
 void InitWindow()
 {
 	window_= SDL_CreateWindow(
@@ -112,6 +111,23 @@ void DrawPath( const Level::Path& path )
 
 	if( path.fork != nullptr )
 	{
+		{
+			auto time= SDL_GetTicks();
+
+			Level::RailSegment segment= path.rails.back();
+			++segment.x;
+			SDL_Surface* s= ( (time / 1000)&1) ? Images::swith_off : Images::swith_on;
+
+			SDL_Rect src_rect{ 0, 0, s->w, s->h };
+			SDL_Rect dst_rect{
+				segment.x * s->w * c_graphics_scale,
+				segment.y * s->h * c_graphics_scale,
+				s->w * c_graphics_scale,
+				s->h * c_graphics_scale };
+
+			SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
+		}
+
 		DrawPath( path.fork->lower_path );
 		DrawPath( path.fork->upper_path );
 	}
@@ -122,27 +138,7 @@ void Draw()
 	const SDL_Rect bg_rect{ 0, 0, surface_->w, surface_->h };
 	SDL_FillRect( surface_, &bg_rect, SDL_MapRGB( surface_->format, c_background_color[0], c_background_color[1], c_background_color[2] ) );
 
-
 	DrawPath( current_level_.root_path );
-	{
-		/*
-		auto time= SDL_GetTicks();
-
-		Level::RailSegment segment;
-		segment.x= 4;
-		segment.y= 5;
-		SDL_Surface* s= ( (time / 1000)&1) ? Images::swith_off : Images::swith_on;
-
-		SDL_Rect src_rect{ 0, 0, s->w, s->h };
-		SDL_Rect dst_rect{
-			segment.x * s->w * c_graphics_scale,
-			segment.y * s->h * c_graphics_scale,
-			s->w * c_graphics_scale,
-			s->h * c_graphics_scale };
-
-		SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
-		*/
-	}
 }
 
 void MainLoop()
