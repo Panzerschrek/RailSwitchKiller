@@ -25,6 +25,7 @@ endif()
 #
 
 set( SOURCES
+	src/level.cpp
 	src/main.cpp
 	)
 
@@ -50,7 +51,7 @@ set( PANZER_JSON_SOURCES
 	PanzerJson/src/serializers_common.inl
 	PanzerJson/src/value.cpp )
 
-add_executable( Game ${SOURCES} ${HEADERS} )
+add_executable( Game ${SOURCES} ${HEADERS} ${PANZER_JSON_SOURCES} ${PANZER_JSON_HEADERS} )
 
 if( WIN32 )
 	target_link_libraries( Game opengl32 )
