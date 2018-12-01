@@ -11,7 +11,14 @@ const float tram_speed= 2.0f;
 void InitPaths_r( LevelState& level_state, const Level::Path& path )
 {
 	if( path.fork != nullptr )
+	{
 		level_state.forks_state[ path.fork.get() ]= LevelState::ForkState::Down;
+		InitPaths_r( level_state, path.fork->lower_path );
+		InitPaths_r( level_state, path.fork->upper_path );
+	}
+
+	for( const Victim& victim : path.path_victims )
+		level_state.victims_state[ &victim ]= LevelState::VictimState::Alive;
 }
 
 LevelState InitLevelState( std::unique_ptr<Level> level )
@@ -89,6 +96,15 @@ void RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, DrawLe
 					// Приехали
 					level_state.level_stage= LevelState::LevelStage::Finish;
 				}
+			}
+			else
+			{
+				const size_t touched_rail= size_t(level_state.tram_state.path_progress + 0.5f);
+				const int victim_number=
+					int(touched_rail) -
+					int(level_state.tram_state.current_path->rails.size() - level_state.tram_state.current_path->path_victims.size());
+				if( victim_number >= 0 && victim_number < int(level_state.tram_state.current_path->path_victims.size()))
+					level_state.victims_state[ &level_state.tram_state.current_path->path_victims[victim_number] ]= LevelState::VictimState::Dead;
 			}
 		}
 

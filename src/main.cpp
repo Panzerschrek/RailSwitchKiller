@@ -37,6 +37,8 @@ SDL_Surface* victim_civilian= nullptr;
 
 SDL_Surface* tram= nullptr;
 
+SDL_Surface* blood[4]= { nullptr, nullptr, nullptr, nullptr };
+
 }
 
 void InitWindow()
@@ -96,6 +98,12 @@ void LoadImages()
 	SDL_SetColorKey( Images::swith_on, 1, transparent_color_key );
 	SDL_SetColorKey( Images::victim_civilian, 1, transparent_color_key );
 	SDL_SetColorKey( Images::tram, 1, transparent_color_key );
+
+	for( int i= 0; i < 4; ++i )
+	{
+		Images::blood[i]= IMG_Load( ("res/blood" + std::to_string(i) + ".bmp").c_str() );
+		SDL_SetColorKey( Images::blood[i], 1, transparent_color_key );
+	}
 }
 
 void FreeImages()
@@ -123,7 +131,7 @@ void DrawPath( const LevelState& level_state, const Level::Path& path )
 {
 	using Direction = Level::RailSegment::Direction;
 
-	size_t number= 0;
+	size_t rail_index= 0;
 	for( const Level::RailSegment& segment : path.rails )
 	{
 		SDL_Surface* rail_surface= nullptr;
@@ -147,24 +155,48 @@ void DrawPath( const LevelState& level_state, const Level::Path& path )
 
 		SDL_UpperBlitScaled( rail_surface, &src_rect, surface_, &dst_rect );
 
-		if( path.path_victims.size() > 0u && path.path_victims.size() >= path.rails.size() - number )
+		if( rail_index >= path.rails.size() - path.path_victims.size() )
 		{
-			SDL_Surface* s= Images::victim_civilian;
+			const Victim& victim= path.path_victims[ rail_index - (path.rails.size() - path.path_victims.size() ) ];
 
-			const int x_offset= ( rail_surface->w - s->w ) / 2;
-			const int y_offset= ( rail_surface->h - s->h ) / 2;
+			{
+				SDL_Surface* s= Images::victim_civilian;
 
-			SDL_Rect src_rect{ 0, 0, s->w, s->h };
-			SDL_Rect dst_rect{
-				segment.x * rail_surface->w * c_graphics_scale + x_offset * c_graphics_scale,
-				segment.y * rail_surface->h * c_graphics_scale + y_offset * c_graphics_scale,
-				s->w * c_graphics_scale,
-				s->h * c_graphics_scale };
+				const int x_offset= ( rail_surface->w - s->w ) / 2;
+				const int y_offset= ( rail_surface->h - s->h ) / 2;
 
-			SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
+				SDL_Rect src_rect{ 0, 0, s->w, s->h };
+				SDL_Rect dst_rect{
+					segment.x * rail_surface->w * c_graphics_scale + x_offset * c_graphics_scale,
+					segment.y * rail_surface->h * c_graphics_scale + y_offset * c_graphics_scale,
+					s->w * c_graphics_scale,
+					s->h * c_graphics_scale };
+
+				SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
+			}
+
+			const auto it= level_state.victims_state.find( &victim );
+			if( it != level_state.victims_state.end() && it->second == LevelState::VictimState::Dead )
+			{
+				int blood_index= ( int(rail_index) + int(reinterpret_cast<uintptr_t>(&path) / 4u ) ) & 3;
+
+				SDL_Surface* s= Images::blood[blood_index];
+
+				const int x_offset= ( rail_surface->w - s->w ) / 2;
+				const int y_offset= ( rail_surface->h - s->h ) / 2;
+
+				SDL_Rect src_rect{ 0, 0, s->w, s->h };
+				SDL_Rect dst_rect{
+					segment.x * rail_surface->w * c_graphics_scale + x_offset * c_graphics_scale,
+					segment.y * rail_surface->h * c_graphics_scale + y_offset * c_graphics_scale,
+					s->w * c_graphics_scale,
+					s->h * c_graphics_scale };
+
+				SDL_UpperBlitScaled( s, &src_rect, surface_, &dst_rect );
+			}
 		}
 
-		++number;
+		++rail_index;
 	}
 
 	if( path.fork != nullptr )

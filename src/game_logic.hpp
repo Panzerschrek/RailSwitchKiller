@@ -29,7 +29,7 @@ struct LevelState
 	int countdown_time_left_s= 0;
 
 	std::unordered_map<const Level::Fork*, ForkState> forks_state;
-	std::unordered_map<const Victim*, ForkState> victims_state;
+	std::unordered_map<const Victim*, VictimState> victims_state;
 
 	struct
 	{
