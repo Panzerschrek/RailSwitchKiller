@@ -3,6 +3,7 @@
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 
+#include "game_logic.hpp"
 #include "level.hpp"
 
 
@@ -10,13 +11,11 @@
 const unsigned int c_window_width= 1024;
 const unsigned int c_window_height= 768;
 
-const int c_graphics_scale = 4;
+const int c_graphics_scale = 3;
 
 SDL_Window* window_= nullptr;
 SDL_Surface* surface_= nullptr;
 TTF_Font* font_= nullptr;
-
-SDL_Surface* test_text_= nullptr;
 
 const unsigned char c_background_color[]= { 32, 32, 32 };
 
@@ -39,8 +38,6 @@ SDL_Surface* victim_civilian= nullptr;
 SDL_Surface* tram= nullptr;
 
 }
-
-Level current_level_;
 
 void InitWindow()
 {
@@ -113,7 +110,7 @@ void InitFont()
 	font_= TTF_OpenFont( "res/DejaVuSans.ttf", 20 );
 
 	SDL_Color color{ 240, 240, 240, 0 };
-	test_text_= TTF_RenderUTF8_Blended_Wrapped( font_, "Тестовый текст\nна несколько строк\nwith latin\nand utf ööüç characters!", color, c_window_width );
+	//test_text_= TTF_RenderUTF8_Blended_Wrapped( font_, "Тестовый текст\nна несколько строк\nwith latin\nand utf ööüç characters!", color, c_window_width );
 }
 
 void DeInitFont()
@@ -194,74 +191,107 @@ void DrawPath( const Level::Path& path )
 	}
 }
 
-void Draw()
+void DrawLevel(const LevelState& level_state )
 {
 	const SDL_Rect bg_rect{ 0, 0, surface_->w, surface_->h };
 	SDL_FillRect( surface_, &bg_rect, SDL_MapRGB( surface_->format, c_background_color[0], c_background_color[1], c_background_color[2] ) );
 
-	DrawPath( current_level_.root_path );
+	const SDL_Color font_color{ 240, 240, 240, 0 };
 
+	if( level_state.level_stage == LevelState::LevelStage::Intro )
 	{
-		const auto segment= current_level_.root_path.rails.front();
+		SDL_Surface* const description_surface=
+			TTF_RenderUTF8_Blended_Wrapped( font_, level_state.level_data->description.c_str(), font_color, c_window_width );
 
-		const int x_offset= ( Images::rails_x->w - Images::tram->w ) / 2;
-		const int y_offset= ( Images::rails_x->h - Images::tram->h ) / 2;
+		SDL_Rect src_rect{ 0, 0, description_surface->w, description_surface->h };
 
-		SDL_Rect src_rect{ 0, 0, Images::tram->w, Images::tram->h };
 		SDL_Rect dst_rect{
-			segment.x * Images::rails_x->w * c_graphics_scale + x_offset * c_graphics_scale,
-			segment.y * Images::rails_x->h * c_graphics_scale + y_offset * c_graphics_scale,
-			Images::tram->w * c_graphics_scale,
-			Images::tram->h * c_graphics_scale };
+			( surface_->w - description_surface->w ) / 2,
+			( surface_->h - description_surface->h ) / 2,
+			description_surface->w,
+			description_surface->h };
 
-		SDL_UpperBlitScaled( Images::tram, &src_rect, surface_, &dst_rect );
+		SDL_UpperBlit( description_surface, &src_rect, surface_, &dst_rect );
+		SDL_FreeSurface(description_surface);
 	}
+	else
 	{
-		SDL_Rect src_rect{ 0, 0, test_text_->w, test_text_->h };
-		SDL_Rect dst_rect{
-			100,
-			200,
-			test_text_->w,
-			test_text_->h };
+		{ // draw stage info
+			std::string text;
+			if( level_state.level_stage == LevelState::LevelStage::Countdown )
+				text= std::to_string(level_state.countdown_time_left_s) + "...";
+			else
+				text= "Action!";
 
-		SDL_UpperBlit( test_text_, &src_rect, surface_, &dst_rect );
+			SDL_Surface* const stage_text_surface= TTF_RenderUTF8_Blended_Wrapped( font_, text.c_str(), font_color, c_window_width );
 
+			SDL_Rect src_rect{ 0, 0, stage_text_surface->w, stage_text_surface->h };
+
+			SDL_Rect dst_rect{
+				( surface_->w - stage_text_surface->w ) / 2,
+				stage_text_surface->h / 2,
+				stage_text_surface->w,
+				stage_text_surface->h };
+
+			SDL_UpperBlit( stage_text_surface, &src_rect, surface_, &dst_rect );
+			SDL_FreeSurface(stage_text_surface);
+		}
+
+		DrawPath( level_state.level_data->root_path );
+
+		{
+			const auto segment= level_state.level_data->root_path.rails.front();
+
+			const int x_offset= ( Images::rails_x->w - Images::tram->w ) / 2;
+			const int y_offset= ( Images::rails_x->h - Images::tram->h ) / 2;
+
+			SDL_Rect src_rect{ 0, 0, Images::tram->w, Images::tram->h };
+			SDL_Rect dst_rect{
+				segment.x * Images::rails_x->w * c_graphics_scale + x_offset * c_graphics_scale,
+				segment.y * Images::rails_x->h * c_graphics_scale + y_offset * c_graphics_scale,
+				Images::tram->w * c_graphics_scale,
+				Images::tram->h * c_graphics_scale };
+
+			SDL_UpperBlitScaled( Images::tram, &src_rect, surface_, &dst_rect );
+		}
 	}
 }
 
-void MainLoop()
+std::vector<InputEvent> MainLoop()
 {
-	while(true)
+	std::vector<InputEvent> input_events;
+
+	SDL_Event event;
+	SDL_Delay(10);
+	do
 	{
-		// Draw
-		if( SDL_MUSTLOCK( surface_ ) )
-			SDL_LockSurface( surface_ );
-
-		Draw();
-
-		if( SDL_MUSTLOCK( surface_ ) )
-			SDL_UnlockSurface( surface_ );
-
-		SDL_UpdateWindowSurface( window_ );
-
-		// Process events
-		SDL_Event event;
-		SDL_Delay(10);
-		//SDL_WaitEvent( &event ); // Wait for events. If there are no events - we can nothing to do.
-		do
+		switch(event.type)
 		{
-			switch(event.type)
+		case SDL_WINDOWEVENT:
+			if( event.window.event == SDL_WINDOWEVENT_CLOSE )
 			{
-			case SDL_WINDOWEVENT:
-				if( event.window.event == SDL_WINDOWEVENT_CLOSE )
-					return;
-				break;
-
-			case SDL_QUIT:
-				return;
+				input_events.emplace_back();
+				input_events.back().kind= InputEvent::Kind::Quit;
 			}
-		} while( SDL_PollEvent(&event) );
-	}
+		break;
+
+		case SDL_QUIT:
+			{
+				input_events.emplace_back();
+				input_events.back().kind= InputEvent::Kind::Quit;
+			}
+			break;
+
+		case SDL_KEYDOWN:
+			{
+				input_events.emplace_back();
+				input_events.back().kind= InputEvent::Kind::Key;
+			}
+			break;
+		}
+	} while( SDL_PollEvent(&event) );
+
+	return input_events;
 }
 
 int main()
@@ -272,9 +302,22 @@ int main()
 	LoadImages();
 	InitFont();
 
-	current_level_= LoadLevel(0);
+	RunLevel(
+		std::unique_ptr<Level>( new Level(LoadLevel(0)) ),
+		MainLoop,
+		[]( const LevelState& level_state )
+		{
+			if( SDL_MUSTLOCK( surface_ ) )
+				SDL_LockSurface( surface_ );
 
-	MainLoop();
+			DrawLevel(level_state);
+
+			if( SDL_MUSTLOCK( surface_ ) )
+				SDL_UnlockSurface( surface_ );
+
+			SDL_UpdateWindowSurface( window_ );
+		});
+
 
 	DeInitFont();
 	FreeImages();

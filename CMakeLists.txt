@@ -26,11 +26,13 @@ endif()
 #
 
 set( SOURCES
+	src/game_logic.cpp
 	src/level.cpp
 	src/main.cpp
 	)
 
 set( HEADERS
+	src/game_logic.hpp
 	src/level.hpp )
 
 set( PANZER_JSON_HEADERS

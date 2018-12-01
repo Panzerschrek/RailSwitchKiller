@@ -1,6 +1,7 @@
 {
 	"name" : "first_level",
-	"description" : "try to push or not thhis lever",
+	"description" : "Перед тобой находится рычаг. Как думаешь, стоит его дёрнуть?\nКак действие, так и бездействие повлекут за собой смерть людей.",
+	"think_time" : 5,
 
 	"root_path":
 	{
