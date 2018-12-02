@@ -222,8 +222,10 @@ LevelState RunLevel( std::unique_ptr<Level> level, MainLoopFunc main_loop_func, 
 			else
 			{
 				const size_t touched_rail= size_t(level_state.tram_state.path_progress + 0.5f);
+				const size_t fork_offset= level_state.tram_state.current_path->fork == nullptr ? 0u : 1u;
+
 				const int victim_number=
-					int(touched_rail) -
+					int(touched_rail + fork_offset) -
 					int(level_state.tram_state.current_path->rails.size() - level_state.tram_state.current_path->path_victims.size());
 				if( victim_number >= 0 && victim_number < int(level_state.tram_state.current_path->path_victims.size()))
 					level_state.victims_state[ &level_state.tram_state.current_path->path_victims[victim_number] ]= LevelState::VictimState::Dead;

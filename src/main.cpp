@@ -176,9 +176,11 @@ void DrawPath( const LevelState& level_state, const Level::Path& path )
 
 		SDL_UpperBlitScaled( rail_surface, &src_rect, surface_, &dst_rect );
 
-		if( rail_index >= path.rails.size() - path.path_victims.size() )
+		const size_t fork_offset= path.fork == nullptr ? 0u : 1u;
+		if( fork_offset + rail_index >= path.rails.size() - path.path_victims.size() &&
+			rail_index != path.rails.size() - fork_offset )
 		{
-			const Victim& victim= path.path_victims[ rail_index - (path.rails.size() - path.path_victims.size() ) ];
+			const Victim& victim= path.path_victims[ rail_index - (path.rails.size() - path.path_victims.size() ) + fork_offset ];
 
 			{
 				SDL_Surface* s= Images::victims[ int(victim) ];
@@ -441,7 +443,7 @@ void DrawIntermissionMenu(const IntermissionState& intermission_state)
 			text+= "-";
 
 		auto color= c_font_color;
-		if( !intermission_state.levels_state[i].completed && i != intermission_state.first_incomplete_level )
+		if( i > intermission_state.first_incomplete_level )
 		{
 			color.r/= 2; color.g/= 2; color.b/= 2;
 		}
