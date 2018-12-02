@@ -273,7 +273,8 @@ void DrawLevel(const LevelState& level_state )
 	}
 	else if( level_state.level_stage == LevelState::LevelStage::Finish )
 	{
-		std::string text= u8"Уровень пройден.\nУбито:\n";
+		std::string text= level_state.finish_state.map_failed ? u8"Уровень провален.\n" : u8"Уровень пройден.\n";
+		text+= u8"Убито:\n";
 		for( int i= 0; i < int(Victim::Count); ++i )
 		{
 			if( level_state.finish_state.intial_count[i] == 0 )
