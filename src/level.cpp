@@ -78,6 +78,7 @@ Level ParseLevel( const PanzerJson::Value& level_json )
 
 	result.name= level_json["name"].AsString();
 	result.description= level_json["description"].AsString();
+	result.success_description= level_json["success_description"].AsString();
 	result.think_time_sec= level_json["think_time"].AsInt();
 
 	result.root_path= ParsePath( level_json["root_path"] );

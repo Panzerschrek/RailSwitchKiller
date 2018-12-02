@@ -301,6 +301,9 @@ void DrawLevel(const LevelState& level_state )
 		for( int i= 0; i < 3; ++i )
 			text+= i < level_state.finish_state.stars ? u8"★" : u8"☆";
 
+		if( level_state.finish_state.stars == 3 )
+			text+= "\n\n" + level_state.level_data->success_description;
+
 		SDL_Surface* const finish_text_surface=
 			TTF_RenderUTF8_Blended_Wrapped( font_, text.c_str(), c_font_color, c_window_width / 3 );
 

@@ -58,6 +58,7 @@ public:
 public:
 	std::string name;
 	std::string description;
+	std::string success_description; // Печатается в конце уровня в случае самого успешного прохождения.
 	int think_time_sec= 5;
 
 	Path root_path;

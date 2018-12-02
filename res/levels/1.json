@@ -1,6 +1,7 @@
 {
 	"name" : "first_level",
-	"description" : "Теперь перед тобой двое обычный человек и лжец. ",
+    "description" : "Теперь перед тобой двое: обычный человек и лжец.",
+    "success_description" : "Оказывается, не все люди равны, кем-то стоит жертвовать больше, чем другим.",
 	"think_time" : 5,
 
 	"root_path":
@@ -27,7 +28,7 @@
 			{
 				"victims" :
 				[
-                    "liar"
+                    "civilian"
 				],
 
 				"rails" :
@@ -47,7 +48,7 @@
 			{
 				"victims" :
 				[
-					"civilian"
+                    "liar"
 				],
 
 				"rails" :
