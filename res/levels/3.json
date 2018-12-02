@@ -1,0 +1,27 @@
+{
+    "name" : "",
+    "description" : "Иногда повлиять ни на что не возможно.",
+    "success_description" : "Он был обречён.",
+    "think_time" : 4,
+
+	"root_path":
+	{
+        "victims" :
+        [
+            "civilian"
+        ],
+
+		"rails" :
+		[
+			{ "x" : 2, "y" : 5, "direction" : "x" },
+			{ "x" : 3, "y" : 5, "direction" : "x" },
+			{ "x" : 4, "y" : 5, "direction" : "x" },
+			{ "x" : 5, "y" : 5, "direction" : "x" },
+            { "x" : 6, "y" : 5, "direction" : "x" },
+            { "x" : 7, "y" : 5, "direction" : "x" },
+            { "x" : 8, "y" : 5, "direction" : "x" },
+            { "x" : 9, "y" : 5, "direction" : "x" },
+            { "x" : 10, "y" : 5, "direction" : "x" }
+        ]
+	}
+}
