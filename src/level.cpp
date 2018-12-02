@@ -12,10 +12,22 @@ Level::Path ParsePath( const PanzerJson::Value& path_json )
 
 		if( PanzerJson::StringCompare( victim_name, "civilian" ) == 0 )
 			result.path_victims.push_back( Victim::Civilian );
+		else if( PanzerJson::StringCompare( victim_name, "child" ) == 0 )
+			result.path_victims.push_back( Victim::CivilianChild );
+		else if( PanzerJson::StringCompare( victim_name, "oldster" ) == 0 )
+			result.path_victims.push_back( Victim::CivilianOldster );
 		else if( PanzerJson::StringCompare( victim_name, "liar" ) == 0 )
 			result.path_victims.push_back( Victim::Liar );
-		else if( PanzerJson::StringCompare( victim_name, "murder" ) == 0 )
+		else if( PanzerJson::StringCompare( victim_name, "thief" ) == 0 )
+			result.path_victims.push_back( Victim::Thief );
+		else if( PanzerJson::StringCompare( victim_name, "murderer" ) == 0 )
 			result.path_victims.push_back( Victim::Murderer );
+		else if( PanzerJson::StringCompare( victim_name, "rapist" ) == 0 )
+			result.path_victims.push_back( Victim::Rapist );
+		else if( PanzerJson::StringCompare( victim_name, "maniac" ) == 0 )
+			result.path_victims.push_back( Victim::Maniac );
+		else if( PanzerJson::StringCompare( victim_name, "capitalist" ) == 0 )
+					result.path_victims.push_back( Victim::Capitalist );
 		else
 			std::cout << "unsupported victim: " << victim_name << std::endl;
 	}

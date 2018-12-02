@@ -35,7 +35,7 @@ SDL_Surface* rails_fork= nullptr;
 SDL_Surface* swith_off= nullptr;
 SDL_Surface* swith_on= nullptr;
 
-SDL_Surface* victim_civilian= nullptr;
+SDL_Surface* victims[ int(Victim::Count) ] = { 0 };
 
 SDL_Surface* tram= nullptr;
 SDL_Surface* tram_up= nullptr;
@@ -86,7 +86,15 @@ void LoadImages()
 	Images::swith_off= IMG_Load( "res/swith_off.bmp" );
 	Images::swith_on= IMG_Load( "res/swith_on.bmp" );
 
-	Images::victim_civilian= IMG_Load( "res/victim_civilian.bmp" );
+	Images::victims[ int(Victim::Civilian) ]= IMG_Load( "res/victim_civilian.bmp" );
+	Images::victims[ int(Victim::CivilianChild) ]= IMG_Load( "res/victim_child.bmp" );
+	Images::victims[ int(Victim::CivilianOldster) ]= IMG_Load( "res/victim_oldster.bmp" );
+	Images::victims[ int(Victim::Liar) ]= IMG_Load( "res/victim_liar.bmp" );
+	Images::victims[ int(Victim::Thief) ]= IMG_Load( "res/victim_thief.bmp" );
+	Images::victims[ int(Victim::Murderer) ]= IMG_Load( "res/victim_murderer.bmp" );
+	Images::victims[ int(Victim::Rapist) ]= IMG_Load( "res/victim_rapist.bmp" );
+	Images::victims[ int(Victim::Maniac) ]= IMG_Load( "res/victim_maniac.bmp" );
+	Images::victims[ int(Victim::Capitalist) ]= IMG_Load( "res/victim_capitalist.bmp" );
 
 	Images::tram= IMG_Load( "res/tram.bmp" );
 	Images::tram_up= IMG_Load( "res/tram_up.bmp" );
@@ -102,7 +110,6 @@ void LoadImages()
 	SDL_SetColorKey( Images::rails_fork, 1, transparent_color_key );
 	SDL_SetColorKey( Images::swith_off, 1, transparent_color_key );
 	SDL_SetColorKey( Images::swith_on, 1, transparent_color_key );
-	SDL_SetColorKey( Images::victim_civilian, 1, transparent_color_key );
 	SDL_SetColorKey( Images::tram, 1, transparent_color_key );
 	SDL_SetColorKey( Images::tram_up, 1, transparent_color_key );
 	SDL_SetColorKey( Images::tram_down, 1, transparent_color_key );
@@ -111,6 +118,12 @@ void LoadImages()
 	{
 		Images::blood[i]= IMG_Load( ("res/blood" + std::to_string(i) + ".bmp").c_str() );
 		SDL_SetColorKey( Images::blood[i], 1, transparent_color_key );
+	}
+
+	for( int i= 0; i < int(Victim::Count); ++i )
+	{
+		if( Images::victims[i] != nullptr )
+			SDL_SetColorKey( Images::victims[i], 1, transparent_color_key );
 	}
 }
 
@@ -168,7 +181,9 @@ void DrawPath( const LevelState& level_state, const Level::Path& path )
 			const Victim& victim= path.path_victims[ rail_index - (path.rails.size() - path.path_victims.size() ) ];
 
 			{
-				SDL_Surface* s= Images::victim_civilian;
+				SDL_Surface* s= Images::victims[ int(victim) ];
+				if( s == nullptr )
+					s= Images::victims[ int(Victim::Civilian) ];
 
 				const int x_offset= ( rail_surface->w - s->w ) / 2;
 				const int y_offset= ( rail_surface->h - s->h ) / 2;
@@ -279,7 +294,7 @@ void DrawLevel(const LevelState& level_state )
 			case Victim::Count: break;
 			};
 
-			text+= "  " + name + " - " + std::to_string(level_state.finish_state.killed[i]) + "/" + std::to_string(level_state.finish_state.intial_count[0]) + "\n";
+			text+= "  " + name + " - " + std::to_string(level_state.finish_state.killed[i]) + "/" + std::to_string(level_state.finish_state.intial_count[i]) + "\n";
 		}
 		text+= u8"Счёт: ";
 		for( int i= 0; i < 3; ++i )
