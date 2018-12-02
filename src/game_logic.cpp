@@ -100,7 +100,7 @@ std::pair<int, int> CalculateWorstAndBestScore( const Level::Path& path )
 		std::pair<int, int> upper_result= CalculateWorstAndBestScore( path.fork->upper_path );
 
 		result.first+= std::min( lower_result.first, upper_result.first );
-		result.second+= std::max( lower_result.second, upper_result.first );
+		result.second+= std::max( lower_result.second, upper_result.second );
 	}
 
 	return result;
