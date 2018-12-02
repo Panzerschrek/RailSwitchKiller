@@ -1,4 +1,8 @@
+#include <fstream>
+#include <iostream>
 #include <SDL.h>
+#include <PanzerJson/parser.hpp>
+#include <PanzerJson/streamed_serializer.hpp>
 #include "game_logic.hpp"
 
 namespace Constants
@@ -6,6 +10,8 @@ namespace Constants
 
 const float tram_speed= 3.0f;
 const int tile_size= 16;
+
+const char save_file_name[]= "save.json";
 
 }
 
@@ -282,4 +288,65 @@ int RunIntermissionMenu(
 	}
 
 	return -1;
+}
+
+void SaveIntermissionState( const IntermissionState& intermission_state )
+{
+	std::ofstream stream( Constants::save_file_name );
+
+	PanzerJson::StreamedSerializer<std::ofstream, PanzerJson::SerializationFormatting::TabIndents> serializer( stream );
+	auto obj= serializer.AddObject();
+
+	obj.AddNumber( "first_incomplete_level", intermission_state.first_incomplete_level );
+
+	{
+		auto arr= obj.AddArray( "levels_state" );
+		for( int i= 0; i < IntermissionState::c_level_count; ++i )
+		{
+			auto level_obj= arr.AddObject();
+
+			level_obj.AddBool( "completed", intermission_state.levels_state[i].completed );
+			level_obj.AddNumber( "stars", intermission_state.levels_state[i].stars );
+		}
+	}
+}
+
+IntermissionState LoadIntermissionState()
+{
+	IntermissionState result;
+
+	std::FILE* const f= std::fopen( Constants::save_file_name, "rb" );
+	if( f == nullptr )
+	{
+		std::cout << "Can not open file " << Constants::save_file_name << std::endl;
+		return result;
+	}
+
+	std::fseek( f, 0, SEEK_END );
+	const size_t file_size= std::ftell( f );
+	std::fseek( f, 0, SEEK_SET );
+
+	std::vector<char> file_content( file_size );
+	std::fread( file_content.data(), 1, file_size, f ); // TODO - check file errors
+	std::fclose(f);
+
+	const PanzerJson::Parser::ResultPtr parse_result=
+		PanzerJson::Parser().Parse( file_content.data(), file_content.size() );
+	if(  parse_result->error != PanzerJson::Parser::Result::Error::NoError )
+	{
+		std::cout << "Error, parsing json" << std::endl;
+		return result;
+	}
+
+	const PanzerJson::Value& state_json= parse_result->root;
+	result.first_incomplete_level= state_json["first_incomplete_level"].AsInt();
+
+	for( int i= 0; i < IntermissionState::c_level_count; ++i )
+	{
+		const PanzerJson::Value& level_state_json= state_json["levels_state"][i];
+		result.levels_state[i].completed= level_state_json["completed"].AsInt() != 0;
+		result.levels_state[i].stars= level_state_json["stars"].AsInt();
+	}
+
+	return result;
 }

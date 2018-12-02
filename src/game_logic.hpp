@@ -87,3 +87,6 @@ int RunIntermissionMenu(
 	const IntermissionState& intermission_state,
 	MainLoopFunc main_loop_func,
 	DrawIntermissionMenuFunc draw_intermission_menu_func );
+
+void SaveIntermissionState( const IntermissionState& intermission_state );
+IntermissionState LoadIntermissionState();

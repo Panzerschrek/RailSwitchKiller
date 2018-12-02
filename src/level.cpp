@@ -85,7 +85,6 @@ Level ParseLevel( const PanzerJson::Value& level_json )
 	return result;
 }
 
-
 Level LoadLevel( int number )
 {
 	Level result;

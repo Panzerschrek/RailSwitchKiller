@@ -505,7 +505,7 @@ int main()
 	LoadImages();
 	InitFont();
 
-	IntermissionState intermission_state;
+	IntermissionState intermission_state= LoadIntermissionState();
 
 	while(true)
 	{
@@ -554,7 +554,11 @@ int main()
 			intermission_state.levels_state[level_number].stars= level_state.finish_state.stars;
 			intermission_state.first_incomplete_level= std::max( intermission_state.first_incomplete_level, level_number + 1 );
 		}
+
+		SaveIntermissionState(intermission_state);
 	}
+
+	SaveIntermissionState(intermission_state);
 
 	DeInitFont();
 	FreeImages();
