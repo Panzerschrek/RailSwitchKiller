@@ -1,0 +1,143 @@
+{
+    "name" : "",
+    "description" : "Иногда главнее путь, чем цель.",
+    "success_description" : "Иногда лучше сначала пожертвовать большим.",
+    "think_time" : 6,
+
+	"root_path":
+	{
+		"rails" :
+		[
+            { "x" : 2, "y" : 8, "direction" : "x" },
+            { "x" : 3, "y" : 8, "direction" : "x" },
+            { "x" : 4, "y" : 8, "direction" : "x" },
+            { "x" : 5, "y" : 8, "direction" : "fork" }
+		],
+
+		"fork" :
+		{
+			"lower_path" :
+			{
+                "victims" :
+                [
+                    "civilian",
+                    "civilian",
+                    "civilian"
+                ],
+
+				"rails" :
+				[
+                    { "x" : 5, "y" : 9, "direction" : "y" },
+                    { "x" : 5, "y" : 10, "direction" : "y" },
+                    { "x" : 5, "y" : 11, "direction" : "y" },
+                    { "x" : 5, "y" : 12, "direction" : "down_to_x" },
+                    { "x" : 6, "y" : 12, "direction" : "x" },
+                    { "x" : 7, "y" : 12, "direction" : "x" },
+                    { "x" : 8, "y" : 12, "direction" : "x" },
+                    { "x" : 9, "y" : 12, "direction" : "fork" }
+                ],
+
+                "fork":
+                {
+                    "lower_path" :
+                    {
+                        "victims":
+                        [
+                             "civilian"
+                        ],
+                        "rails" :
+                        [
+                            { "x" : 9, "y" : 13, "direction" : "y" },
+                            { "x" : 9, "y" : 14, "direction" : "down_to_x" },
+                            { "x" : 10, "y" : 14, "direction" : "x" },
+                            { "x" : 11, "y" : 14, "direction" : "x" },
+                            { "x" : 12, "y" : 14, "direction" : "x" },
+                            { "x" : 13, "y" : 14, "direction" : "x" },
+                            { "x" : 14, "y" : 14, "direction" : "x" }
+                        ]
+                    },
+                    "upper_path" :
+                    {
+                        "victims":
+                        [
+                        ],
+                        "rails" :
+                        [
+                            { "x" : 9, "y" : 11, "direction" : "y" },
+                            { "x" : 9, "y" : 10, "direction" : "up_to_x" },
+                            { "x" : 10, "y" : 10, "direction" : "x" },
+                            { "x" : 11, "y" : 10, "direction" : "x" },
+                            { "x" : 12, "y" : 10, "direction" : "x" },
+                            { "x" : 13, "y" : 10, "direction" : "x" },
+                            { "x" : 14, "y" : 10, "direction" : "x" }
+                        ]
+                    }
+                }
+			},
+
+			"upper_path" :
+			{
+				"victims" :
+				[
+                     "civilian",
+                     "civilian"
+				],
+
+				"rails" :
+				[
+                    { "x" : 5, "y" : 7, "direction" : "y" },
+                    { "x" : 5, "y" : 6, "direction" : "y" },
+                    { "x" : 5, "y" : 5, "direction" : "y" },
+                    { "x" : 5, "y" : 4, "direction" : "up_to_x" },
+                    { "x" : 6, "y" : 4, "direction" : "x" },
+                    { "x" : 7, "y" : 4, "direction" : "x" },
+                    { "x" : 8, "y" : 4, "direction" : "x" },
+                    { "x" : 9, "y" : 4, "direction" : "fork" }
+                ],
+
+                "fork":
+                {
+                    "lower_path" :
+                    {
+                        "victims":
+                        [
+                             "civilian",
+                             "civilian",
+                             "civilian",
+                             "civilian"
+                        ],
+                        "rails" :
+                        [
+                            { "x" : 9, "y" : 5, "direction" : "y" },
+                            { "x" : 9, "y" : 6, "direction" : "down_to_x" },
+                            { "x" : 10, "y" : 6, "direction" : "x" },
+                            { "x" : 11, "y" : 6, "direction" : "x" },
+                            { "x" : 12, "y" : 6, "direction" : "x" },
+                            { "x" : 13, "y" : 6, "direction" : "x" },
+                            { "x" : 14, "y" : 6, "direction" : "x" }
+                        ]
+                    },
+                    "upper_path" :
+                    {
+                        "victims":
+                        [
+                             "civilian",
+                             "civilian",
+                             "civilian"
+                        ],
+                        "rails" :
+                        [
+                            { "x" : 9, "y" : 3, "direction" : "y" },
+                            { "x" : 9, "y" : 2, "direction" : "up_to_x" },
+                            { "x" : 10, "y" : 2, "direction" : "x" },
+                            { "x" : 11, "y" : 2, "direction" : "x" },
+                            { "x" : 12, "y" : 2, "direction" : "x" },
+                            { "x" : 13, "y" : 2, "direction" : "x" },
+                            { "x" : 14, "y" : 2, "direction" : "x" }
+                        ]
+                    }
+                }
+			}
+		}
+	}
+}
