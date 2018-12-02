@@ -1,0 +1,64 @@
+{
+    "name" : "",
+    "description" : "Дети - наше будущее?",
+    "success_description" : "Не беда, бабы ещё нарожают.",
+    "think_time" : 5,
+
+	"root_path":
+	{
+		"rails" :
+		[
+			{ "x" : 2, "y" : 5, "direction" : "x" },
+			{ "x" : 3, "y" : 5, "direction" : "x" },
+			{ "x" : 4, "y" : 5, "direction" : "x" },
+			{ "x" : 5, "y" : 5, "direction" : "x" },
+            { "x" : 6, "y" : 5, "direction" : "x" },
+            { "x" : 7, "y" : 5, "direction" : "fork" }
+		],
+
+		"fork" :
+		{
+			"lower_path" :
+			{
+                "victims" :
+                [
+                    "civilian",
+                    "civilian",
+                    "civilian",
+                    "civilian"
+                ],
+
+				"rails" :
+				[
+                    { "x" : 7, "y" : 6, "direction" : "y" },
+                    { "x" : 7, "y" : 7, "direction" : "y" },
+                    { "x" : 7, "y" : 8, "direction" : "down_to_x" },
+                    { "x" : 8, "y" : 8, "direction" : "x" },
+                    { "x" : 8, "y" : 8, "direction" : "x" },
+                    { "x" : 9, "y" : 8, "direction" : "x" },
+                    { "x" : 10, "y" : 8, "direction" : "x" },
+                    { "x" : 11, "y" : 8, "direction" : "x" }
+                ]
+			},
+
+			"upper_path" :
+			{
+				"victims" :
+				[
+                   "child"
+				],
+
+				"rails" :
+				[
+                    { "x" : 7, "y" : 4, "direction" : "y" },
+                    { "x" : 7, "y" : 3, "direction" : "y" },
+                    { "x" : 7, "y" : 2, "direction" : "up_to_x" },
+                    { "x" : 8, "y" : 2, "direction" : "x" },
+                    { "x" : 9, "y" : 2, "direction" : "x" },
+                    { "x" : 10, "y" : 2, "direction" : "x" },
+                    { "x" : 11, "y" : 2, "direction" : "x" }
+				]
+			}
+		}
+	}
+}
